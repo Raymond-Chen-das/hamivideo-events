@@ -19,6 +19,8 @@ from pathlib import Path
 warnings.filterwarnings("ignore")
 import pandas as pd
 
+from metrics import periods_to_threshold
+
 RAW = REPO / "data" / "raw"
 KW = 'Hami Video'
 
@@ -47,11 +49,8 @@ for name, (d0, d1) in EVENTS.items():
     base = s.iloc[max(0, pi - 13): pi - 5]
     bmed, bmax = base.median(), base.max()
 
-    after = s.iloc[pi + 1:]
-    hh = after[after <= peak / 2]
-    half = (hh.index[0] - pday).days // 7 if len(hh) else None
-    rr = after[after <= bmax]
-    back = (rr.index[0] - pday).days // 7 if len(rr) else None
+    half = periods_to_threshold(s, pi, peak / 2)
+    back = periods_to_threshold(s, pi, bmax)
 
     print("=" * 78)
     print(f"■ {name}   賽事期間 {d0} ~ {d1}（參考日，未查一手來源）")

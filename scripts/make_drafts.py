@@ -13,6 +13,8 @@ import pandas as pd
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
+from metrics import baseline_band
+
 RAW = REPO / "data" / "raw"
 OUT = REPO / "drafts"
 OUT.mkdir(parents=True, exist_ok=True)
@@ -44,10 +46,8 @@ XLO, DHI, AHI = -3, 12, 8   # XLO~DHI 為收集範圍；AHI 為草稿 A 的顯�
 for e in EVENTS:
     pk = pd.Timestamp(e["peak"]); pi = wk.index.get_loc(pk); peak = int(wk.iloc[pi])
     idx = [i for i in range(pi + XLO, pi + DHI + 1) if 0 <= i < len(wk)]
-    # 基準帶＝峰值前 26~6 週的 p25–p75。用分位數而非 min–max：WBC 的基準窗含世足（max=36），
-    # min–max 會被前一事件污染成無意義的寬帶。p75 同時是回歸門檻。
-    w20 = wk.iloc[max(0, pi - 26): pi - 5]
-    blo, bhi = float(w20.quantile(.25)), float(w20.quantile(.75))
+    # 基準帶＝峰值前 26~6 週的 p25–p75（定義與失效點見 metrics.baseline_band 與其測試）。
+    blo, bhi = baseline_band(wk, pi)
     e.update(peak_val=peak, pi=pi,
              x=[i - pi for i in idx],
              raw=[int(wk.iloc[i]) for i in idx],

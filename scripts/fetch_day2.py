@@ -11,6 +11,8 @@ import pandas as pd
 from pytrends.request import TrendReq
 from pytrends.exceptions import TooManyRequestsError
 
+from metrics import spike_ratio
+
 BASE = REPO
 RAW, LOGS = BASE / "data" / "raw", BASE / "logs"
 LOGFILE = LOGS / "quota_attempts.csv"
@@ -64,9 +66,7 @@ def fetch(query_label, kw_list, out_name, max_attempts=2):
 def clean(df):
     return df[~df['isPartial'].astype(bool)] if 'isPartial' in df.columns else df
 
-def spike_ratio(s):
-    med = s.median()
-    return (float('inf') if med == 0 else round(s.max() / med, 2)), s.max(), s.idxmax()
+# spike_ratio 已移入 metrics.py 並附測試（tests/test_metrics.py），行為不變。
 
 print("Day 2 START", dt.datetime.now().isoformat(timespec='seconds'), flush=True)
 

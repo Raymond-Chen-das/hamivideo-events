@@ -9,6 +9,8 @@ from pathlib import Path
 warnings.filterwarnings("ignore")
 import pandas as pd
 
+from metrics import periods_to_threshold
+
 RAW = REPO / "data" / "raw"
 KW = 'Hami Video'
 
@@ -56,9 +58,7 @@ for name, (d0, d1) in EVENTS.items():
     base_old = wk.iloc[max(0, pi - 13): pi - 5]
     base_new = wk.iloc[max(0, pi - 26): pi - 5]
     thr = base_new.median() + 1
-    after = wk.iloc[pi + 1:]
-    rr = after[after <= thr]
-    back = (rr.index[0] - pday).days // 7 if len(rr) else None
+    back = periods_to_threshold(wk, pi, thr)
     rows.append(dict(賽事=name, 峰值=peak,
                      原基準中位數=base_old.median(), 原基準上緣=base_old.max(),
                      新基準中位數=base_new.median(), 新門檻=thr,

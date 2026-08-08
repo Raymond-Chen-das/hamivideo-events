@@ -5,6 +5,7 @@ __pycache__/
 .venv/
 venv/
 .ipynb_checkpoints/
+.pytest_cache/
 
 # Backups (governance rule: create before editing, delete after read-back verification)
 *.bak

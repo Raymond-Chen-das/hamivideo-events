@@ -54,12 +54,22 @@ Requires Python 3.13, `pandas`, `plotly`. No network access needed — all input
 snapshots under `data/raw/`.
 
 ```bash
+pytest -q                                    # 14 tests over the metrics the results depend on
 python scripts/analysis_weekly_main.py       # main result: the table below
 python scripts/analysis_daily_vs_weekly.py   # weekly-smoothing check + baseline revision
 python scripts/analysis_alignment.py         # peak-aligned vs end-aligned comparison
 python scripts/make_drafts.py                # regenerate the charts (asserts as it builds)
 python scripts/verify_drafts.py              # verify the written HTML, not the in-memory figure
 ```
+
+`scripts/metrics.py` holds the four quantities the conclusions rest on
+(`half_life`, `spike_ratio`, `periods_to_threshold`, `baseline_band`). They are
+tested because each has a path that changes the answer without raising: a
+half-life that is never reached returns `None` (not zero, and not "fast"), and a
+spike ratio over an all-zero median returns `inf`. One test deliberately pins the
+*breakdown point* of the baseline band — under roughly a quarter contamination the
+p25–p75 window stops being robust, so the definition is not unconditionally safe
+for events spaced closer together than these three.
 
 `scripts/fetch_day*.py` hit the Google Trends API and **consume quota** — do not run
 them without reading [`docs/prompt-verify-google-trends.md`](docs/prompt-verify-google-trends.md)
@@ -135,6 +145,7 @@ delivery?" — none do. The full attempt log is in
 data/raw/     Google Trends snapshots (CSV) + collection timestamp
 logs/         append-only log of every API attempt, successful or not
 scripts/      analysis, chart generation, verification, and (quota-consuming) fetch
+tests/        pytest suite over scripts/metrics.py, including a real-data regression lock
 drafts/       chart drafts; plotly.min.js is vendored so they open offline
 docs/         project rules, decision trail, and the outstanding verification spec
 ```

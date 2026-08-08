@@ -10,6 +10,8 @@ import pandas as pd
 from pytrends.request import TrendReq
 from pytrends.exceptions import TooManyRequestsError
 
+from metrics import half_life
+
 BASE = REPO
 RAW, LOGS = BASE / "data" / "raw", BASE / "logs"
 LOGFILE = LOGS / "quota_attempts.csv"
@@ -69,13 +71,8 @@ def fetch(query_label, kw_list, timeframe, out_name, max_attempts):
 def clean(df):
     return df[~df['isPartial'].astype(bool)] if 'isPartial' in df.columns else df
 
-def half_life(s):
-    """峰值日之後，數值首次落到 峰值/2 以下（<=）所需的天數。回不到就 None。"""
-    peak = s.max()
-    pday = s.idxmax()
-    after = s[s.index > pday]
-    hit = after[after <= peak / 2]
-    return (None if hit.empty else (hit.index[0] - pday).days), peak, pday
+# half_life 已移入 metrics.py 並附測試（tests/test_metrics.py）。
+# 回傳單位由「天數」改為「期數」——日資料兩者相同，此處行為不變。
 
 KW = ['Hami Video', 'Netflix', 'Disney+']
 print("Day 1 START", dt.datetime.now().isoformat(timespec='seconds'), flush=True)
