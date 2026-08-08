@@ -1,0 +1,91 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>專案摘要｜Hami Video 賽事熱度衰退</title>
+<style>
+@page { size: A4; margin: 10mm 11mm; }
+*{box-sizing:border-box;}
+body{margin:0;background:#f4f4f2;color:#0b0b0b;font-family:system-ui, -apple-system, "Segoe UI", "Microsoft JhengHei", sans-serif;line-height:1.5;
+     font-size:11.8px;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+.page{max-width:900px;margin:0 auto;background:#fff;padding:24px 28px 20px;}
+h1{font-size:19px;font-weight:660;margin:0 0 3px;letter-spacing:-.01em;}
+.sub{font-size:11.5px;color:#898781;margin:0 0 16px;}
+h2{font-size:13px;font-weight:650;margin:13px 0 5px;padding-bottom:4px;
+   border-bottom:1.5px solid #0b0b0b;}
+.hero{background:#fafafa;border-left:3px solid #2a78d6;padding:13px 17px;}
+.big{font-size:23px;font-weight:680;letter-spacing:-.015em;line-height:1.35;color:#2a78d6;}
+.verdict{font-size:12.3px;color:#52514e;margin-top:7px;padding-top:7px;
+         border-top:1px solid #e1e0d9;}
+/* 滿版。曾為了把 PDF 擠進一頁而縮到 78%，但使用者「兩頁無所謂，視覺化要佳」——
+   這張圖是整份摘要的視覺重心，為了頁數把它縮小是本末倒置。 */
+.fig{width:100%;display:block;margin:11px auto 0;border:1px solid #e1e0d9;border-radius:7px;}
+table{border-collapse:collapse;width:100%;font-size:11.5px;margin-top:5px;
+      font-variant-numeric:tabular-nums;}
+th,td{border-bottom:1px solid #e1e0d9;padding:6px 9px 6px 0;text-align:left;
+      vertical-align:top;}
+th{color:#898781;font-weight:600;font-size:11px;}
+td.hit{font-weight:660;color:#2a78d6;}
+td.cap{font-weight:640;width:150px;}
+td.where{color:#898781;font-size:10.3px;width:180px;font-family:ui-monospace,monospace;}
+.anchor{background:#fbf9f4;border:1px solid #e6e0cf;border-radius:7px;
+        padding:8px 12px;font-size:11.2px;margin-top:7px;}
+.honest{background:#fdf7f7;border:1px solid #eedcdc;border-radius:7px;
+        padding:10px 14px;font-size:11.5px;}
+.honest b{color:#b03030;}
+ul{margin:5px 0 0;padding-left:17px;} li{margin:3px 0;}
+code{font-size:10.5px;background:#f0f0ee;padding:0 3px;border-radius:3px;}
+.foot{margin-top:15px;padding-top:9px;border-top:1px solid #e1e0d9;
+      font-size:10.3px;color:#898781;}
+@media print{ body{background:#fff;} .page{padding:0;max-width:none;} }
+</style>
+<div class="page">
+
+<h1>賽事熱度在賽後多久回到原點？</h1>
+<p class="sub">Hami Video（中華電信影視平台）× 三場國際賽事　·　資料：Google Trends 台灣，
+週解析度 2021-08 ~ 2026-07（n=261）　·
+外部求職者以公開資料製作，非中華電信內部文件</p>
+
+<div class="hero">
+  <div class="big">賽事帶來的是<b>脈衝</b>，不是<b>階梯</b>。</div>
+  <div class="verdict"><b>定案句：</b>賽事熱度在賽後 1–2 週內完全回到賽前基準，三場皆然——在這份資料的解析度下觀測不到任何殘留提升。</div>
+</div>
+
+<img class="fig" src="../docs/images/chart-decay-figure.png"
+     alt="三場賽事的熱度衰退：每格一場，賽後 3–5 週內回到賽前基準帶">
+
+<h2>三場賽事，同一次查詢、同一尺度，直接可比</h2>
+<table>
+  <tr><th>賽事</th><th>賽程(週)</th><th>峰值</th><th>爆發倍率</th>
+      <th>賽前基準帶</th><th>回到基準</th></tr>
+  <tr><td>2022 世界盃</td><td>4.0</td><td>36</td><td>36.0×</td><td>1–2</td><td class='hit'>5 週</td></tr><tr><td>2023 WBC</td><td>0.6</td><td>32</td><td>16.0×</td><td>1–2</td><td class='hit'>3 週</td></tr><tr><td>2024 巴黎奧運</td><td>2.3</td><td>46</td><td>23.0×</td><td>2–3</td><td class='hit'>3 週</td></tr>
+</table>
+<p style="font-size:11.5px;color:#52514e;margin:8px 0 0;">
+<b>重點不是任何單一數字。</b> 爆發倍率的分母（賽前基準）本身在漂移，跨年比較並不乾淨；
+真正硬的是<b>三場都在 3–5 週內回到基準帶</b>——賽程長度從 0.6 週到 4.0 週，
+結果卻一致。衰退<b>形狀</b>的差異幾乎完全是賽程長度的機械後果，不是主要發現。</p>
+
+<div class="anchor">
+<b>唯一的外部參照</b>：中華電信官方新聞稿（2023-03-24）公布 WBC 期間 Hami Video
+訂閱數較去年同期成長 <b>11.2 倍</b>；本分析單以搜尋熱度算出的 WBC 爆發倍率為
+<b>16.0×</b>。
+⚠️ <b>兩者定義不同</b>（官方是訂閱數 YoY，本分析是峰值 ÷ 賽前基準中位數），
+<b>不可直接比較、不宣稱吻合</b>。可以說的是量級相近——這是目前唯一能為
+「搜尋熱度不等於訂閱數」這條限制提供外部參照的資料點。
+</div>
+
+<h2>條件對照</h2>
+<table>
+  <tr><th>能力項目</th><th>本專案的對應證據</th><th>位置</th></tr>
+  <tr><td class='cap'>判準先於資料</td><td>閾值與事件選擇規則在看資料前存檔；<b>事後修正標示為事後，原數字保留不刪</b>（基準窗被前一事件污染 → 8 週 min–max 改 20 週 p25–p75）</td><td class='where'>docs/decision-trail.md</td></tr><tr><td class='cap'>結論所依賴的量有測試</td><td>14 項 pytest 蓋住四個<b>會改變結論卻不會報錯</b>的函式；其中一項釘住基準帶的崩潰點——該定義並非無條件安全</td><td class='where'>scripts/metrics.py｜tests/</td></tr><tr><td class='cap'>驗證產出的成品，不是記憶體裡的物件</td><td>解析寫出的 HTML：shape 幾何、三種寬度的標註碰撞與溢出、<b>標註是否被資料線穿過</b></td><td class='where'>scripts/verify_charts.py</td></tr><tr><td class='cap'>不穩定來源的取用紀律</td><td>實測配額是<b>觸發式封鎖</b>而非節流（0/30 橫跨 47.5 小時）→ 改 fail-fast；每次請求成敗都進 append-only 紀錄</td><td class='where'>logs/quota_attempts.csv</td></tr><tr><td class='cap'>解析度作為方法論</td><td>同一場賽事週級把峰值判在開幕週、日級判在決賽日。<b>兩張都交付，因為分歧本身就是結果</b></td><td class='where'>charts/daily-vs-weekly.html</td></tr>
+</table>
+
+<h2>我不宣稱的事</h2>
+<div class="honest"><ul><li>沒有任何訂閱、退訂、註冊或轉換資料——本分析只看得到搜尋關注。</li><li>不宣稱因果，也不使用預設有識別策略的方法名。三場之間賽事類型與賽程長度完全混淆（n=3），結論只能是描述性的。</li><li>本專案不含模型，也不是每日運行的管線。價值在約束與工程紀律，不在演算法。</li><li>深色模式未做——兩種模式應各自由調色盤取步、而非自動反轉，尚未執行。</li><li>四項驗證未完成（可重現性、MOD 對照、事件詞、兩個日級窗），皆被配額擋下。逐項問過「不補就不能交付嗎」，答案都是不能阻斷。</li></ul></div>
+
+<p class="foot">
+限制六條完整版見 <code>README.md</code>，第一條為「搜尋熱度不等於訂閱數」——
+賽事期間訂閱、賽後不再搜尋但未退訂的人，這份資料分不開。
+判準與推翻歷程見 <code>docs/decision-trail.md</code>（append-only）。
+本頁所有數值由 <code>scripts/build_onepager.py</code> 於產生時從快照重新計算，非手動填寫。
+</p>
+
+</div>

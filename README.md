@@ -11,6 +11,11 @@ survives the event.
 
 <sup>Interactive version: [`charts/decay-by-event.html`](charts/decay-by-event.html) — opens offline.</sup>
 
+**Two-page summary for screening:** [`charts/onepager.html`](charts/onepager.html)
+· [`charts/onepager.pdf`](charts/onepager.pdf). Every figure on it is recomputed
+from the snapshot at build time and reconciled against the numbers published in the
+delivery spec — the build fails if they disagree.
+
 ## What
 
 If a tournament permanently lifted attention, the curve would settle at a new,
