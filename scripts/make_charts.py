@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""產生兩張視覺草稿（HTML + Plotly）。零 API 請求，只讀 raw/ 既有 CSV。
+"""產生兩張圖表（HTML + Plotly）。零 API 請求，只讀 raw/ 既有 CSV。
 A：三格 small multiples（主視覺）
 C：世足 日 vs 週（方法論，第二張）
 
@@ -19,7 +19,7 @@ from plotly.subplots import make_subplots
 from metrics import baseline_band
 
 RAW = REPO / "data" / "raw"
-OUT = REPO / "drafts"
+OUT = REPO / "charts"
 OUT.mkdir(parents=True, exist_ok=True)
 
 # ── 調色盤（dataviz 參考實例，validate_palette.js 全 PASS）
@@ -54,8 +54,8 @@ EVENTS = [
     dict(name="2024 巴黎奧運", peak="2024-07-28", start=dt.date(2024, 7, 26), end=dt.date(2024, 8, 11),
          baseline=2.0, back=3, dur=2.3, note="賽程 2.3 週"),
 ]
-XLO, DHI, AHI = -3, 12, 8   # XLO~DHI 為收集範圍；AHI 為草稿 A 的顯示上限
-# 草稿 A 的版面常數。標註要用像素位移把文字送到指定的資料高度，就必須知道繪圖區高度，
+XLO, DHI, AHI = -3, 12, 8   # XLO~DHI 為收集範圍；AHI 為主圖 的顯示上限
+# 主圖 的版面常數。標註要用像素位移把文字送到指定的資料高度，就必須知道繪圖區高度，
 # 抽成常數以免和 update_layout 的 height／margin 各寫一份而漂移。
 A_HEIGHT, A_MARGIN_T, A_MARGIN_B = 430, 52, 54
 A_PLOT_H = A_HEIGHT - A_MARGIN_T - A_MARGIN_B      # 324px
@@ -80,7 +80,14 @@ for e in EVENTS:
              blo=blo, bhi=bhi, blo_n=blo / peak, bhi_n=bhi / peak)
 
 
-def shell(title, sub, figdiv, table_html, extra=""):
+def shell(title, sub, figdiv, table_html, extra="", more=""):
+    """more 放「寫給自己的」細節（座標語意、定義推導）。
+
+    門面只留讀者做判斷需要的東西；把方法細節塞進圖下方的六行小字，
+    對讀者是雜訊，對自己才是紀錄——所以收進可摺疊區，兩者都不犧牲。
+    """
+    more_html = (f'<details><summary>方法細節（座標語意、基準帶定義）</summary>'
+                 f'<p class="foot">{more}</p></details>') if more else ""
     return f"""<meta charset="utf-8"><title>{title}</title>
 <style>
  body{{margin:0;background:#f9f9f7;color:{INK};font-family:{FONT};}}
@@ -98,7 +105,7 @@ def shell(title, sub, figdiv, table_html, extra=""):
 <div class="wrap"><h1>{title}</h1><p class="sub">{sub}</p>
 <div class="card">{figdiv}</div>
 <details><summary>表格檢視（每個數值都可讀，不倚賴 tooltip）</summary>{table_html}</details>
-<p class="foot">{extra}</p></div>"""
+<p class="foot">{extra}</p>{more_html}</div>"""
 
 
 BASE_LAYOUT = dict(paper_bgcolor=SURFACE, plot_bgcolor=SURFACE,
@@ -147,7 +154,7 @@ for c, e in enumerate(EVENTS, start=1):
     # 免責小字放右上角：三格的右上都是空白（峰值在 x=0，之後單調下降到基準）。
     # 原本放左上（x=XLO+0.15, y=0.845）會被 x=-1→0 的陡升段穿過——
     # 該段在 y=84.5% 處的 x 約為 −0.16，正落在文字的水平跨距內。
-    # 2026-08-08 實際渲染截圖才看見；verify_drafts.py 當時只比對標註與標註，
+    # 2026-08-08 實際渲染截圖才看見；verify_charts.py 當時只比對標註與標註，
     # 不比對標註與資料線，所以一路回報「無碰撞」。檢查已一併補上。
     figA.add_annotation(x=AHI - 0.2, y=0.97, xref=xr, yref=yr, text=DISCLAIMER,
                         showarrow=False, xanchor="right", font=dict(size=11, color=MUTED))
@@ -201,8 +208,8 @@ def assert_ann_inside(fig, label, yranges):
 
 print("斷言檢查：")
 # A：每格 = 賽程 vrect + 基準帶 hrect + 基準上緣 hline，共 3 × 3 格 = 9
-assert_shapes(figA, "draft-A", 9)
-assert_ann_inside(figA, "draft-A", {f"y{i or ''}": (0, 1.14) for i in range(0, 4)})
+assert_shapes(figA, "decay-by-event", 9)
+assert_ann_inside(figA, "decay-by-event", {f"y{i or ''}": (0, 1.14) for i in range(0, 4)})
 
 
 def after_vals(e, n=3):
@@ -250,7 +257,7 @@ figC.update_xaxes(range=[d0, d1],
                   showgrid=False, zeroline=False, linecolor=AXIS, ticks="outside",
                   tickcolor=AXIS, ticklen=4, tickformat="%m/%d",
                   tickfont=dict(size=11.5, color=MUTED))
-figC.update_yaxes(range=[0, 1.15], tickformat=".0%",   # 縱軸標題已移除，理由同草稿 A
+figC.update_yaxes(range=[0, 1.15], tickformat=".0%",   # 縱軸標題已移除，理由同主圖
                   showgrid=True, gridcolor=GRID, zeroline=False, linecolor=AXIS,
                   tickfont=dict(size=11.5, color=MUTED))
 figC.update_layout(height=440, legend=dict(orientation="h", y=1.13, x=0, font=dict(size=12)),
@@ -265,29 +272,34 @@ tableC = f"<table><tr><th>日期</th><th>日指數</th><th>該日所屬週的週
 
 # ── 輸出
 opts = dict(full_html=False, include_plotlyjs="directory", config={"displayModeBar": False})
-(OUT / "draft-a-small-multiples.html").write_text(shell(
-    "草稿 A｜三場賽事的熱度回歸（主視覺）",
+(OUT / "decay-by-event.html").write_text(shell(
+    "三場賽事的熱度回歸｜Hami Video 搜尋熱度",
     "每格一場賽事。<b>直式陰影＝實際賽程長度</b>（4.0／0.6／2.3 週，等比），"
     "<b>橫向灰帶＝賽前基準帶</b>，帶上緣的實線是回歸門檻。三格重複同一結構——讀者自己看出模式一致。"
     "<br>縱軸是<b>各場相對於自己的峰值</b>（＝100%），<b>三格不共用絕對尺度</b>；"
     "三格同一個顏色，因為三場都是同一個品牌的不同時間，不是三個實體。",
     figA.to_html(**opts), tableA,
-    "<b>資料</b>：Google Trends 台灣，Hami Video，週解析度，2021-08～2026-07（<code>raw/groupA_brand_5yr.csv</code>，"
-    "取於 2026-08-03）。<br><b>基準帶定義</b>：峰值前 26～6 週的 p25–p75。"
+    # 門面：讀者要對這張圖下判斷，只需要這三件事。
+    "<b>限制</b>：搜尋熱度不等於訂閱數——賽後不再搜尋的人未必退訂，這份資料分不開兩者。"
+    "<br>賽後基準區的值是 1–3 的整數，<b>偵測下限依基準而異</b>："
+    "基準 3→+33%、基準 2→+50%、<b>基準 1（世足）→+100%</b>；小於該幅度的殘留提升看不見。"
+    "<br><b>三場賽事 Hami Video 皆有轉播</b>（世足專區＋獨家 AR／WBC 60 天方案＋Hami WBC1 台／"
+    "巴黎奧運官方轉播表，2026-08-06 查證）——選這三場是因為它們是 Hami Video 自己打過的仗。"
+    "<b>但賽事日期本身未查一手來源</b>，峰值與賽事的對應是日期對齊，不是驗證過的歸因。"
+    "<br><b>資料</b>：Google Trends 台灣，Hami Video，週解析度，2021-08～2026-07"
+    "（<code>data/raw/groupA_brand_5yr.csv</code>，取於 2026-08-03）。",
+    # 摺疊：寫給自己與願意深讀的人。
+    "<b>基準帶定義</b>：峰值前 26～6 週的 p25–p75。"
     "用分位數而非 min–max，因為 WBC 的基準窗含世足（max=36），min–max 會被前一事件污染。"
     "帶上緣（p75）同時是「回到基準」的判定門檻。"
     "<b>奧運賽前第 1 週的值 13 落在帶外——那是賽前預熱，本來就該看得見。</b>"
     "<br><b>座標語意</b>：資料點是<b>整週聚合、標於週起始日</b>；直式陰影是<b>實際賽程日期</b>。"
     "兩者不是同一種座標，所以短賽事會出現「峰值點落在陰影左側」——"
     "WBC 的峰值週從 3/5 起算，台灣賽事 3/8 才開打。這是資料本身的粒度，不是繪圖誤差。"
-    "<br><b>限制</b>：搜尋熱度不等於訂閱數——賽後不再搜尋的人未必退訂，"
-    "這份資料分不開兩者。<br>賽後基準區的值是 1–3 的整數，"
-    "偵測下限依基準而異：基準 3→+33%、基準 2→+50%、<b>基準 1（世足）→+100%</b>；"
-    "小於該幅度的殘留提升看不見。<br>賽事日期未查一手來源，屬待驗事實。"
 ), encoding="utf-8")
 
-(OUT / "draft-c-daily-vs-weekly.html").write_text(shell(
-    "草稿 C｜同一場世足，日資料與週資料講出不同的故事（方法論，第二張）",
+(OUT / "daily-vs-weekly.html").write_text(shell(
+    "日資料與週資料講出不同的故事｜解析度如何改變結論",
     "週平均把單日爆發抹平了：<b>日資料的最高點是決賽日 12/18，週資料的最高點卻在開幕週</b>。"
     "解析度的選擇會改變結論。"
     "<br>兩條線<b>各自相對於自己的峰值</b>（＝100%）。同色相的深淺兩階，"

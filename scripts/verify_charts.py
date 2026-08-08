@@ -8,7 +8,7 @@ import base64, json, re, struct, sys
 from datetime import datetime
 from pathlib import Path
 
-D = REPO / "drafts"
+D = REPO / "charts"
 fails = []
 
 
@@ -27,11 +27,11 @@ def layout_of(path):
 
 
 print("=" * 70)
-data, lay, txt = layout_of(D / "draft-a-small-multiples.html")
+data, lay, txt = layout_of(D / "decay-by-event.html")
 shapes = lay.get("shapes", [])
-print(f"draft-A  traces={len(data)}  shapes={len(shapes)}")
+print(f"decay-by-event  traces={len(data)}  shapes={len(shapes)}")
 if len(shapes) != 9:
-    fails.append(f"draft-A shapes={len(shapes)}，應為 9")
+    fails.append(f"decay-by-event shapes={len(shapes)}，應為 9")
 
 rects = [s for s in shapes if s.get("type") == "rect"]
 vr = [s for s in rects if s.get("y0") in (0, "0") or str(s.get("yref", "")).endswith("domain")]
@@ -45,21 +45,21 @@ for i, (w, g) in enumerate(zip(want, got)):
     ok = abs(w - g) < 0.01
     print(f"    格 {i+1}: 期望 {w:>5} 實際 {g:>5}  {'✔' if ok else '�’✘'}")
     if not ok:
-        fails.append(f"draft-A 第 {i+1} 格賽程寬度 {g} != {w}")
+        fails.append(f"decay-by-event 第 {i+1} 格賽程寬度 {g} != {w}")
 if len(got) != 3:
-    fails.append(f"draft-A 找到 {len(got)} 個賽程陰影，應為 3")
+    fails.append(f"decay-by-event 找到 {len(got)} 個賽程陰影，應為 3")
 
 print("\n  基準帶（橫向 rect，xref 為 domain）與上緣實線：")
 bands = [s for s in rects if str(s.get("xref", "")).endswith("domain")]
 lines = [s for s in shapes if s.get("type") == "line"]
 print(f"    基準帶 rect = {len(bands)} 個, 上緣 line = {len(lines)} 條")
 if len(bands) != 3:
-    fails.append(f"draft-A 基準帶 {len(bands)} 個，應為 3")
+    fails.append(f"decay-by-event 基準帶 {len(bands)} 個，應為 3")
 if len(lines) != 3:
-    fails.append(f"draft-A 基準上緣線 {len(lines)} 條，應為 3")
+    fails.append(f"decay-by-event 基準上緣線 {len(lines)} 條，應為 3")
 for b, l in zip(bands, lines):
     if abs(b["y1"] - l["y0"]) > 1e-9:
-        fails.append(f"draft-A 基準帶上緣 {b['y1']} 與實線 {l['y0']} 不吻合")
+        fails.append(f"decay-by-event 基準帶上緣 {b['y1']} 與實線 {l['y0']} 不吻合")
 
 anns = [a.get("text", "") for a in lay.get("annotations", [])]
 print(f"\n  註記 {len(anns)} 則。指涉陰影的註記：")
@@ -67,10 +67,10 @@ for a in anns:
     if "陰影" in a:
         print(f"    「{a}」→ 陰影 rect 存在：{len(got) == 3}")
         if len(got) != 3:
-            fails.append("draft-A 有『陰影』註記但陰影不存在")
+            fails.append("decay-by-event 有『陰影』註記但陰影不存在")
 print(f"  「搜尋熱度 ≠ 訂閱數」出現 {sum('訂閱數' in a for a in anns)} 次（應為 3，每格一次）")
 if sum("訂閱數" in a for a in anns) != 3:
-    fails.append("draft-A 免責小字不是每格都有")
+    fails.append("decay-by-event 免責小字不是每格都有")
 
 # ── 標註碰撞：用幾何算，不靠眼睛 ────────────────────────────────────────────
 def text_box(t, size):
@@ -120,7 +120,7 @@ def ann_boxes(lay, W):
 # 而驗證器一路回報「✔ 無碰撞」——**宣稱的檢查強度高於實際的檢查強度**。
 # 這一類只能靠渲染截圖用眼睛發現，所以把它變成機器檢查。
 def _num(v):
-    """資料座標可能是數值或 ISO 日期字串（草稿 C 的 x 軸是時間）。"""
+    """資料座標可能是數值或 ISO 日期字串（方法圖 的 x 軸是時間）。"""
     if isinstance(v, (int, float)):
         return float(v)
     s = str(v).replace("T", " ").strip()
@@ -134,8 +134,8 @@ def _num(v):
 
 
 # Plotly 6 會把 numpy／pandas 陣列序列化成 {"dtype": "f8", "bdata": "<base64>"}，
-# 而不是純 JSON 陣列。草稿 A 的座標是 Python list（原樣輸出），
-# 草稿 C 的來自 pandas，就是這種二進位形式——不解碼會拿到字串 'dtype'。
+# 而不是純 JSON 陣列。主圖 的座標是 Python list（原樣輸出），
+# 方法圖 的來自 pandas，就是這種二進位形式——不解碼會拿到字串 'dtype'。
 _DTYPE = {"f8": "d", "f4": "f", "i8": "q", "i4": "i", "i2": "h", "i1": "b",
           "u8": "Q", "u4": "I", "u2": "H", "u1": "B"}
 
@@ -190,13 +190,13 @@ def trace_polylines(lay, data, W):
         xr, yr = tr.get("xaxis", "x"), tr.get("yaxis", "y")
         ax = lay[xr.replace("x", "xaxis").replace("axis1", "axis")]
         ay = lay[yr.replace("y", "yaxis").replace("axis1", "axis")]
-        # 單一座標軸的圖（草稿 C）不會輸出 domain；未設 range 時也不會輸出 range。
+        # 單一座標軸的圖（方法圖）不會輸出 domain；未設 range 時也不會輸出 range。
         # domain 可安全預設為 [0,1]；range 缺失則無法精確定位，直接擋下——
         # 驗證工具不做近似，寧可要求產生端把 range 寫明。
         d0, d1 = ax.get("domain", (0.0, 1.0))
         if "range" not in ax or "range" not in ay:
             fails.append(f"{xr}/{yr} 未設定 range，無法做標註 vs 資料線檢查"
-                         "（請在 make_drafts.py 明確指定 range）")
+                         "（請在 make_charts.py 明確指定 range）")
             continue
         xlo, xhi = (_num(v) for v in ax["range"])
         ylo, yhi = (_num(v) for v in ay["range"])
@@ -250,33 +250,33 @@ for W in (900, 1100, 1400):
                for b in boxes if b[4] < -0.5 or b[5] > b[6] + 0.5]
     status = "✔ 無碰撞、無溢出" if not (hits or outside) else "✘ " + " / ".join(hits + outside)
     print(f"    {W}px: {status}")
-    fails.extend([f"draft-A @{W}px: {h}" for h in hits + outside])
+    fails.extend([f"decay-by-event @{W}px: {h}" for h in hits + outside])
 
-check_ann_vs_data(lay, data, "draft-A")
+check_ann_vs_data(lay, data, "decay-by-event")
 
 print("\n" + "=" * 70)
-for name, exp_shapes in [("draft-c-daily-vs-weekly.html", 0)]:
+for name, exp_shapes in [("daily-vs-weekly.html", 0)]:
     d, l, t = layout_of(D / name)
     s = l.get("shapes", [])
     fills = [tr.get("fill") for tr in d if tr.get("fill")]
     print(f"{name}: traces={len(d)} shapes={len(s)} trace填色={fills}")
     if len(s) != exp_shapes:
         fails.append(f"{name} shapes={len(s)}，應為 {exp_shapes}")
-    check_ann_vs_data(l, d, "draft-C")
+    check_ann_vs_data(l, d, "daily-vs-weekly")
 
 print("\n" + "=" * 70)
-EXPECTED = {"draft-a-small-multiples.html", "draft-c-daily-vs-weekly.html", "plotly.min.js"}
+EXPECTED = {"decay-by-event.html", "daily-vs-weekly.html", "plotly.min.js"}
 actual = {p.name for p in D.iterdir() if p.is_file()}
-print(f"drafts/ 內容：{sorted(actual)}")
+print(f"charts/ 內容：{sorted(actual)}")
 if actual - EXPECTED:
-    fails.append(f"drafts/ 有非預期檔案：{sorted(actual - EXPECTED)}"
+    fails.append(f"charts/ 有非預期檔案：{sorted(actual - EXPECTED)}"
                  "（草稿 B 已於 2026-08-05 刪除，不得復活）")
 if EXPECTED - actual:
-    fails.append(f"drafts/ 缺少：{sorted(EXPECTED - actual)}")
+    fails.append(f"charts/ 缺少：{sorted(EXPECTED - actual)}")
 
 js = D / "plotly.min.js"
 print(f"plotly.min.js 存在={js.exists()} 大小={js.stat().st_size if js.exists() else 0:,}")
-for f in D.glob("draft-*.html"):
+for f in D.glob("*.html"):
     if 'src="plotly.min.js"' not in f.read_text(encoding="utf-8"):
         fails.append(f"{f.name} 未引用 plotly.min.js")
 

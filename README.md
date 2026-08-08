@@ -1,22 +1,35 @@
 # hamivideo-events
 
-**How fast does the search interest from a major sporting event decay?**
-An event study on Hami Video (Chunghwa Telecom's streaming service) across three
-international tournaments, using Google Trends as the only observable signal.
+## **A tournament produces a pulse, not a step.**
+
+Across three international tournaments, search interest in Hami Video (Chunghwa
+Telecom's streaming service) returns to its pre-event baseline **within 1–2 weeks
+of the final whistle — every time.** At this data's resolution, no residual lift
+survives the event.
+
+![Three tournaments, one brand: each panel shows the decay back to the pre-event baseline band, with the shaded column marking actual tournament length](docs/images/chart-decay.png)
+
+<sup>Interactive version: [`charts/decay-by-event.html`](charts/decay-by-event.html) — opens offline.</sup>
 
 ## What
 
-Three tournaments, one brand, one question: after the games end, does elevated
-attention persist, or does it collapse back to where it started?
-
-**Finding:** search interest returns to the pre-event baseline within 1–2 weeks
-after each tournament ends — in all three cases. **At this data's resolution, no
-residual lift is observable.** In other words, a tournament produces a *pulse*,
-not a *step*.
+If a tournament permanently lifted attention, the curve would settle at a new,
+higher level — a *step*. It does not. It spikes and falls back — a *pulse*. That
+is the whole result, and it holds in all three cases.
 
 The differences in decay *shape* between the three events are almost entirely a
 mechanical consequence of how long each tournament ran. The non-trivial result is
 the convergence, not the divergence.
+
+**One external reference point.** Chunghwa Telecom's own press release
+(2023-03-24) reported Hami Video subscriptions up **11.2× year-on-year** during
+the WBC. The burst ratio computed here from search interest alone is **16.0×**.
+⚠️ **These are different quantities** — theirs is subscriptions YoY, this is peak
+÷ pre-event baseline median — **so they cannot be compared directly and no
+agreement is claimed.** What can be said is that the orders of magnitude are
+close, which is weak external evidence that search interest tracks something
+real. It is the only outside anchor available for the "search interest is not
+subscriptions" limitation below.
 
 ## Method
 
@@ -58,8 +71,8 @@ pytest -q                                    # 14 tests over the metrics the res
 python scripts/analysis_weekly_main.py       # main result: the table below
 python scripts/analysis_daily_vs_weekly.py   # weekly-smoothing check + baseline revision
 python scripts/analysis_alignment.py         # peak-aligned vs end-aligned comparison
-python scripts/make_drafts.py                # regenerate the charts (asserts as it builds)
-python scripts/verify_drafts.py              # verify the written HTML, not the in-memory figure
+python scripts/make_charts.py                # regenerate the charts (asserts as it builds)
+python scripts/verify_charts.py              # verify the written HTML, not the in-memory figure
 ```
 
 `scripts/metrics.py` holds the four quantities the conclusions rest on
@@ -75,12 +88,24 @@ for events spaced closer together than these three.
 them without reading [`docs/prompt-verify-google-trends.md`](docs/prompt-verify-google-trends.md)
 first. Everything else is offline.
 
-`verify_drafts.py` parses the generated HTML and checks shape geometry, annotation
-collisions at three container widths, overflow beyond the plot area, and that no
-annotation refers to an element that does not exist. This exists because a silent
-failure mode was hit once: `add_vrect`/`add_hline` default to
-`exclude_empty_subplots=True` and discard shapes added to a subplot that has no
-traces yet — no error, no warning.
+`verify_charts.py` parses the generated HTML and checks shape geometry, annotation
+collisions at three container widths, overflow beyond the plot area, **annotations
+crossed by the data lines**, and that no annotation refers to an element that does
+not exist. Each of those checks exists because a silent failure got through once:
+`add_vrect`/`add_hline` default to `exclude_empty_subplots=True` and drop shapes on
+a subplot that has no traces yet — no error, no warning; and the annotation-vs-line
+check was added after a rendered screenshot showed the disclaimer sitting directly
+under the rising edge in all three panels while the verifier reported no collisions.
+
+**What this project got wrong first.** The verifier passing did not mean the charts
+were right — it meant they passed the checks that existed. Six times in this repo
+and its sibling, a check claimed more rigour than it performed: tolerance cases
+folded into a pass count, a comment promising row-by-row comparison that only
+compared totals, autorange silently disabling a geometric check, buffer counts
+double-added across plan nodes. Every one surfaced at the moment the output was put
+in front of a person. The rule that came out of it: **any number or pixel that
+reaches a deliverable needs a verification path independent of the code that
+produced it** — a rendered screenshot, a known-bad input, a checksum.
 
 ## Results
 
@@ -98,8 +123,13 @@ Normalized decay (peak = 1.000):
 | WBC | 1.000 | 0.344 | 0.125 | 0.062 | 0.062 | 0.062 |
 | Paris Olympics | 1.000 | 0.761 | 0.087 | 0.065 | 0.065 | 0.065 |
 
-Charts: [`drafts/`](drafts/) — `draft-a-small-multiples.html` (primary) and
-`draft-c-daily-vs-weekly.html` (method).
+The method chart — same event, two resolutions, two different answers:
+
+![Weekly aggregation puts the World Cup peak in the opening week; daily data puts it on the final. The same series, two aggregations, two different stories](docs/images/chart-daily-vs-weekly.png)
+
+<sup>Interactive: [`charts/daily-vs-weekly.html`](charts/daily-vs-weekly.html).
+Both lines are normalized to their own peak, so only shape and peak position are
+comparable — not height.</sup>
 
 Colour encodes the entity, never the ranking. All three panels of the primary
 chart use one blue, because the three tournaments are the same brand at different
@@ -132,9 +162,13 @@ of them shaped the design.
    The snapshot under `data/raw/` freezes an unstable source — that is the reason
    it exists, not a claim that the data is stable. The reproducibility test was
    blocked by quota (see below).
-5. **Event dates were not verified against primary sources**, and the correspondence
-   between peaks and tournaments is *date alignment, not attribution*. Whether
-   Chunghwa Telecom held broadcast rights for any of these events was not checked.
+5. **Peaks are matched to tournaments by date alignment, not attribution**, and the
+   tournament dates themselves were not verified against primary sources.
+   Broadcast rights *were* checked (2026-08-06): Hami Video carried all three —
+   a World Cup section with exclusive AR, a 60-day WBC package plus the Hami WBC1
+   channel, and the official Paris Olympics schedule. So the events are ones this
+   platform actually competed in; what remains unverified is the exact dates and
+   the causal link between a given peak and a given match.
 6. **Only the World Cup window has daily data.** The WBC and Olympic windows were
    never retrieved.
 
@@ -153,7 +187,8 @@ data/raw/     Google Trends snapshots (CSV) + collection timestamp
 logs/         append-only log of every API attempt, successful or not
 scripts/      analysis, chart generation, verification, and (quota-consuming) fetch
 tests/        pytest suite over scripts/metrics.py, including a real-data regression lock
-drafts/       chart drafts; plotly.min.js is vendored so they open offline
+charts/       the two charts; plotly.min.js is vendored so they open offline
+docs/images/  rendered screenshots embedded above
 docs/         project rules, decision trail, and the outstanding verification spec
 ```
 
