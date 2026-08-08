@@ -4,7 +4,8 @@
 """
 from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]   # repo 根目錄，腳本可隨 repo 搬移
-import json, re, sys
+import base64, json, re, struct, sys
+from datetime import datetime
 from pathlib import Path
 
 D = REPO / "drafts"
@@ -87,14 +88,17 @@ def ann_boxes(lay, W):
     out = []
     for a in lay.get("annotations", []):
         xr, yr = str(a.get("xref", "x")), str(a.get("yref", "y"))
-        if xr.startswith("paper") or not isinstance(a.get("x"), (int, float)):
+        if xr.startswith("paper") or a.get("x") is None:
             continue
         ax = lay[xr.replace("x", "xaxis").replace("axis1", "axis")]
         ay = lay[yr.replace("y", "yaxis").replace("axis1", "axis")]
-        d0, d1 = ax["domain"]
-        xlo, xhi = ax["range"]; ylo, yhi = ay["range"]
-        cx = (d0 + (a["x"] - xlo) / (xhi - xlo) * (d1 - d0)) * plot_w + a.get("xshift", 0)
-        cy = (a["y"] - ylo) / (yhi - ylo) * plot_h + a.get("yshift", 0)
+        if "range" not in ax or "range" not in ay:
+            continue
+        d0, d1 = ax.get("domain", (0.0, 1.0))
+        xlo, xhi = (_num(v) for v in ax["range"])
+        ylo, yhi = (_num(v) for v in ay["range"])
+        cx = (d0 + (_num(a["x"]) - xlo) / (xhi - xlo) * (d1 - d0)) * plot_w + a.get("xshift", 0)
+        cy = (_num(a["y"]) - ylo) / (yhi - ylo) * plot_h + a.get("yshift", 0)
         # showarrow 時 x/y 是「箭頭指向的點」，文字在 (ax, ay) 偏移處。
         # Plotly 的 ay 以螢幕座標為準（正值向下），本函式用左下原點，故取負號。
         if a.get("showarrow"):
@@ -108,6 +112,125 @@ def ann_boxes(lay, W):
         y0 = cy - h / 2 if yanc in ("middle", "auto") else (cy if yanc == "bottom" else cy - h)
         out.append((xr, a.get("text", ""), x0, x0 + w, y0, y0 + h, plot_h))
     return out
+
+
+# ── 標註 vs 資料線 ────────────────────────────────────────────────────────
+# 2026-08-08 補：原本只比對「標註 vs 標註」與「標註 vs 繪圖區邊界」，
+# 完全沒有比對「標註 vs 資料線」。結果是免責小字被 x=-1→0 的陡升段整個穿過，
+# 而驗證器一路回報「✔ 無碰撞」——**宣稱的檢查強度高於實際的檢查強度**。
+# 這一類只能靠渲染截圖用眼睛發現，所以把它變成機器檢查。
+def _num(v):
+    """資料座標可能是數值或 ISO 日期字串（草稿 C 的 x 軸是時間）。"""
+    if isinstance(v, (int, float)):
+        return float(v)
+    s = str(v).replace("T", " ").strip()
+    for fmt in ("%Y-%m-%d %H:%M:%S.%f", "%Y-%m-%d %H:%M:%S",
+                "%Y-%m-%d %H:%M", "%Y-%m-%d"):
+        try:
+            return datetime.strptime(s, fmt).timestamp()
+        except ValueError:
+            continue
+    raise ValueError(f"無法解析座標值：{v!r}")
+
+
+# Plotly 6 會把 numpy／pandas 陣列序列化成 {"dtype": "f8", "bdata": "<base64>"}，
+# 而不是純 JSON 陣列。草稿 A 的座標是 Python list（原樣輸出），
+# 草稿 C 的來自 pandas，就是這種二進位形式——不解碼會拿到字串 'dtype'。
+_DTYPE = {"f8": "d", "f4": "f", "i8": "q", "i4": "i", "i2": "h", "i1": "b",
+          "u8": "Q", "u4": "I", "u2": "H", "u1": "B"}
+
+
+def _seq(v):
+    """把 trace 的座標欄位轉成 Python list，處理 Plotly 的 base64 二進位編碼。"""
+    if isinstance(v, dict) and "bdata" in v:
+        code = _DTYPE.get(v.get("dtype"))
+        if code is None:
+            raise ValueError(f"未支援的 dtype：{v.get('dtype')}")
+        raw = base64.b64decode(v["bdata"])
+        n = len(raw) // struct.calcsize(code)
+        return list(struct.unpack("<" + code * n, raw))
+    return list(v)
+
+
+def _seg_hits_box(p0, p1, box):
+    """線段與矩形是否相交（Liang–Barsky 裁剪）。"""
+    (x0, y0), (x1, y1) = p0, p1
+    bx0, bx1, by0, by1 = box
+    if max(x0, x1) < bx0 or min(x0, x1) > bx1:
+        return False
+    if max(y0, y1) < by0 or min(y0, y1) > by1:
+        return False
+    dx, dy = x1 - x0, y1 - y0
+    t0, t1 = 0.0, 1.0
+    for p, q in ((-dx, x0 - bx0), (dx, bx1 - x0), (-dy, y0 - by0), (dy, by1 - y0)):
+        if p == 0:
+            if q < 0:
+                return False
+        else:
+            r = q / p
+            if p < 0:
+                if r > t1:
+                    return False
+                t0 = max(t0, r)
+            else:
+                if r < t0:
+                    return False
+                t1 = min(t1, r)
+    return t0 <= t1
+
+
+def trace_polylines(lay, data, W):
+    """把每條 trace 的資料點換成像素座標，座標系與 ann_boxes 相同（左下原點）。"""
+    m = lay["margin"]
+    plot_w, plot_h = W - m["l"] - m["r"], lay["height"] - m["t"] - m["b"]
+    out = []
+    for tr in data:
+        if not tr.get("x") or not tr.get("y"):
+            continue
+        xr, yr = tr.get("xaxis", "x"), tr.get("yaxis", "y")
+        ax = lay[xr.replace("x", "xaxis").replace("axis1", "axis")]
+        ay = lay[yr.replace("y", "yaxis").replace("axis1", "axis")]
+        # 單一座標軸的圖（草稿 C）不會輸出 domain；未設 range 時也不會輸出 range。
+        # domain 可安全預設為 [0,1]；range 缺失則無法精確定位，直接擋下——
+        # 驗證工具不做近似，寧可要求產生端把 range 寫明。
+        d0, d1 = ax.get("domain", (0.0, 1.0))
+        if "range" not in ax or "range" not in ay:
+            fails.append(f"{xr}/{yr} 未設定 range，無法做標註 vs 資料線檢查"
+                         "（請在 make_drafts.py 明確指定 range）")
+            continue
+        xlo, xhi = (_num(v) for v in ax["range"])
+        ylo, yhi = (_num(v) for v in ay["range"])
+        pts = []
+        for xv, yv in zip(_seq(tr["x"]), _seq(tr["y"])):
+            if xv is None or yv is None:
+                continue
+            px = (d0 + (_num(xv) - xlo) / (xhi - xlo) * (d1 - d0)) * plot_w
+            py = (_num(yv) - ylo) / (yhi - ylo) * plot_h
+            pts.append((px, py))
+        out.append((xr, tr.get("name", "?"), pts))
+    return out
+
+
+def check_ann_vs_data(lay, data, label, widths=(900, 1100, 1400), pad=1.0):
+    """標註文字方塊不得被任何資料線穿過。pad 是容差，避免擦邊誤報。"""
+    print(f"\n  標註 vs 資料線（{label}）：")
+    for W in widths:
+        boxes = ann_boxes(lay, W)
+        lines = trace_polylines(lay, data, W)
+        hits = []
+        for xr, text, x0, x1, y0, y1, _ in boxes:
+            box = (x0 + pad, x1 - pad, y0 + pad, y1 - pad)
+            if box[0] >= box[1] or box[2] >= box[3]:
+                continue
+            for lxr, name, pts in lines:
+                if lxr != xr:
+                    continue
+                if any(_seg_hits_box(pts[i], pts[i + 1], box)
+                       for i in range(len(pts) - 1)):
+                    hits.append(f"「{text}」被資料線「{name}」（{xr}）穿過")
+                    break
+        print(f"    {W}px: " + ("✔ 無穿越" if not hits else "✘ " + " / ".join(hits)))
+        fails.extend([f"{label} @{W}px: {h}" for h in hits])
 
 
 print("\n  標註碰撞檢測（多容器寬度）：")
@@ -129,6 +252,8 @@ for W in (900, 1100, 1400):
     print(f"    {W}px: {status}")
     fails.extend([f"draft-A @{W}px: {h}" for h in hits + outside])
 
+check_ann_vs_data(lay, data, "draft-A")
+
 print("\n" + "=" * 70)
 for name, exp_shapes in [("draft-c-daily-vs-weekly.html", 0)]:
     d, l, t = layout_of(D / name)
@@ -137,6 +262,7 @@ for name, exp_shapes in [("draft-c-daily-vs-weekly.html", 0)]:
     print(f"{name}: traces={len(d)} shapes={len(s)} trace填色={fills}")
     if len(s) != exp_shapes:
         fails.append(f"{name} shapes={len(s)}，應為 {exp_shapes}")
+    check_ann_vs_data(l, d, "draft-C")
 
 print("\n" + "=" * 70)
 EXPECTED = {"draft-a-small-multiples.html", "draft-c-daily-vs-weekly.html", "plotly.min.js"}

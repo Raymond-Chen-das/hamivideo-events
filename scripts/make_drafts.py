@@ -55,6 +55,16 @@ EVENTS = [
          baseline=2.0, back=3, dur=2.3, note="賽程 2.3 週"),
 ]
 XLO, DHI, AHI = -3, 12, 8   # XLO~DHI 為收集範圍；AHI 為草稿 A 的顯示上限
+# 草稿 A 的版面常數。標註要用像素位移把文字送到指定的資料高度，就必須知道繪圖區高度，
+# 抽成常數以免和 update_layout 的 height／margin 各寫一份而漂移。
+A_HEIGHT, A_MARGIN_T, A_MARGIN_B = 430, 52, 54
+A_PLOT_H = A_HEIGHT - A_MARGIN_T - A_MARGIN_B      # 324px
+A_YMAX = 1.14                                       # y 軸上限（0~1.14）
+
+
+def a_yshift_to(y_from, y_to):
+    """求把標註從資料高度 y_from 推到 y_to 所需的像素位移（Plotly 的 ay 正值向下）。"""
+    return -round((y_to - y_from) / A_YMAX * A_PLOT_H)
 
 for e in EVENTS:
     pk = pd.Timestamp(e["peak"]); pi = wk.index.get_loc(pk); peak = int(wk.iloc[pi])
@@ -116,18 +126,31 @@ for c, e in enumerate(EVENTS, start=1):
     xr = f"x{c if c > 1 else ''}"; yr = f"y{c if c > 1 else ''}"
     figA.add_annotation(x=0, y=1.0, xref=xr, yref=yr, text=f"<b>峰值 {e['peak_val']}</b>",
                         showarrow=False, yshift=17, font=dict(size=12, color=INK))
-    # yshift 必須為正：帶的位置貼近繪圖區底部（距底僅 ~16px），往下放會有半個字高落到軸外。
-    figA.add_annotation(x=AHI - 0.2, y=e["bhi_n"], xref=xr, yref=yr,
+    # 基準帶標籤改放右上，疊在免責小字下面一行。
+    # 原位置（貼在帶的右端 y=bhi_n）同時被賽後的平緩資料線與「N 週後回到基準」的引線穿過。
+    # 中途試過左上，結果撞上 x=−1→0 的陡升段——**左上在 y≈0.97 並不空**，
+    # 那條近乎垂直的線會一路衝到頂。三格真正共通的空白只有右上：峰值在 x=0，之後單調下降。
+    figA.add_annotation(x=AHI - 0.2, y=0.87, xref=xr, yref=yr,
                         text=f"賽前基準帶 {e['blo']:.0f}–{e['bhi']:.0f}", showarrow=False,
-                        yshift=13, xanchor="right", font=dict(size=11.5, color=MUTED))
+                        xanchor="right", font=dict(size=11.5, color=MUTED))
     # 「陰影＝賽程期間」註記已移除：與「峰值 NN」垂直僅差 1.4px，900px 容器下必然重疊；
     # 且每格標題已寫「賽程 X 週」，陰影就在該位置，註記是冗餘的。
-    figA.add_annotation(x=e["back"], y=e["y"][e["back"] - XLO], xref=xr, yref=yr,
+    # 兩處改動：ay 改為算出來的值（把文字抬到資料高度 0.38），xanchor 改為 left（文字向右展開）。
+    # 原本 ay=−40、置中：文字只抬離資料點一點點且向左跨過陡降段，容器越窄越明顯。
+    # 向右展開是關鍵——**陡降段永遠在回歸點的左側**，右側必為已回到基準的平緩段，
+    # 所以這個方向對三格都成立，不必逐格微調。
+    y_back = e["y"][e["back"] - XLO]
+    figA.add_annotation(x=e["back"], y=y_back, xref=xr, yref=yr,
                         text=f"<b>{e['back']} 週後回到基準</b>", showarrow=True, arrowhead=0,
-                        arrowcolor=MUTED, arrowwidth=1, ax=6, ay=-40,
-                        font=dict(size=11.5, color=INK2))
-    figA.add_annotation(x=XLO + 0.15, y=0.845, xref=xr, yref=yr, text=DISCLAIMER,
-                        showarrow=False, xanchor="left", font=dict(size=11, color=MUTED))
+                        arrowcolor=MUTED, arrowwidth=1, ax=10, ay=a_yshift_to(y_back, 0.38),
+                        xanchor="left", font=dict(size=11.5, color=INK2))
+    # 免責小字放右上角：三格的右上都是空白（峰值在 x=0，之後單調下降到基準）。
+    # 原本放左上（x=XLO+0.15, y=0.845）會被 x=-1→0 的陡升段穿過——
+    # 該段在 y=84.5% 處的 x 約為 −0.16，正落在文字的水平跨距內。
+    # 2026-08-08 實際渲染截圖才看見；verify_drafts.py 當時只比對標註與標註，
+    # 不比對標註與資料線，所以一路回報「無碰撞」。檢查已一併補上。
+    figA.add_annotation(x=AHI - 0.2, y=0.97, xref=xr, yref=yr, text=DISCLAIMER,
+                        showarrow=False, xanchor="right", font=dict(size=11, color=MUTED))
 figA.update_xaxes(range=[XLO - .35, AHI + .35], dtick=2, title_text="峰值後週數",
                   showgrid=False, zeroline=False, linecolor=AXIS, ticks="outside",
                   tickcolor=AXIS, ticklen=4, tickfont=dict(size=11.5, color=MUTED))
@@ -213,12 +236,18 @@ figC.add_annotation(x=pd.Timestamp("2022-12-18"), y=1.0, text="<b>決賽日 12/1
                     "同一週的週指數只有 9　<b>被壓掉 6.8 倍</b>",
                     showarrow=True, arrowhead=0, arrowcolor=MUTED, arrowwidth=1,
                     ax=-96, ay=-46, font=dict(size=12, color=INK), align="left")
+# ax 由 −4 改為 −132：原位置讓文字騎在 11/20 的陡升段上（截圖可見「開幕週」三字
+# 被日資料線穿過）。往左推到 11/20 之前的平坦區，該處兩條線都貼著 3% 附近。
 figC.add_annotation(x=pd.Timestamp("2022-11-20"), y=0.62, text="週資料的峰值在<b>開幕週</b>",
                     showarrow=True, arrowhead=0, arrowcolor=MUTED, arrowwidth=1,
-                    ax=-4, ay=-52, font=dict(size=12, color=INK2), align="left")
+                    ax=-132, ay=-30, font=dict(size=12, color=INK2), align="left")
 figC.add_annotation(x=pd.Timestamp("2022-11-03"), y=1.06, text=DISCLAIMER, showarrow=False,
                     xanchor="left", font=dict(size=11, color=MUTED))
-figC.update_xaxes(showgrid=False, zeroline=False, linecolor=AXIS, ticks="outside",
+# range 明確寫出（原本靠 autorange）：Plotly 不會把 autorange 的結果寫進 layout JSON，
+# 驗證器就無從把資料座標換算成像素，標註 vs 資料線的檢查會整段跳過。
+# 版面自我描述是驗證的前提——不寫 range 等於讓檢查靜默失效。
+figC.update_xaxes(range=[d0, d1],
+                  showgrid=False, zeroline=False, linecolor=AXIS, ticks="outside",
                   tickcolor=AXIS, ticklen=4, tickformat="%m/%d",
                   tickfont=dict(size=11.5, color=MUTED))
 figC.update_yaxes(range=[0, 1.15], tickformat=".0%",   # 縱軸標題已移除，理由同草稿 A
