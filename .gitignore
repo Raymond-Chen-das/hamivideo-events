@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.ipynb_checkpoints/
+
+# Backups (governance rule: create before editing, delete after read-back verification)
+*.bak
+*.bak-*
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editors
+.vscode/
+.idea/
+
+# Note: drafts/plotly.min.js IS tracked on purpose.
+# The charts must open offline (same constraint as the sibling broadband project),
+# so the bundle is vendored rather than loaded from a CDN. It never changes,
+# so it does not inflate history.
