@@ -98,9 +98,16 @@ Normalized decay (peak = 1.000):
 | WBC | 1.000 | 0.344 | 0.125 | 0.062 | 0.062 | 0.062 |
 | Paris Olympics | 1.000 | 0.761 | 0.087 | 0.065 | 0.065 | 0.065 |
 
-Charts: [`drafts/`](drafts/) — `draft-a-small-multiples.html` (primary),
-`draft-c-daily-vs-weekly.html` (method). `draft-b-overlay.html` is a rejected
-alternative kept for comparison and is **not** part of the deliverable.
+Charts: [`drafts/`](drafts/) — `draft-a-small-multiples.html` (primary) and
+`draft-c-daily-vs-weekly.html` (method).
+
+Colour encodes the entity, never the ranking. All three panels of the primary
+chart use one blue, because the three tournaments are the same brand at different
+times rather than three different things. The method chart uses two lightness
+steps of that same hue, because weekly and daily are two aggregations of one
+series — dark is daily, light is weekly, and the lightness difference is itself
+the point being made. A rejected overlay variant was deleted once it had served
+its purpose; the reasoning is kept in [`docs/decision-trail.md`](docs/decision-trail.md).
 
 ## Limitations
 

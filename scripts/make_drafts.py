@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
-"""產生三張視覺草稿（HTML + Plotly）。零 API 請求，只讀 raw/ 既有 CSV。
-A：三格 small multiples（主視覺候選）
-B：疊合正規化曲線（對照，不進交付）
+"""產生兩張視覺草稿（HTML + Plotly）。零 API 請求，只讀 raw/ 既有 CSV。
+A：三格 small multiples（主視覺）
 C：世足 日 vs 週（方法論，第二張）
+
+草稿 B（疊合正規化曲線）已於 2026-08-05 刪除：用途是讓人比較設計方向，目的已達成，
+否決理由留在 docs/decision-trail.md。留著只會持續消耗版面維護成本。
+編號保留 A/C 不重排，避免與既有文件、commit 訊息對不上。
 """
 from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]   # repo 根目錄，腳本可隨 repo 搬移
@@ -19,8 +22,18 @@ RAW = REPO / "data" / "raw"
 OUT = REPO / "drafts"
 OUT.mkdir(parents=True, exist_ok=True)
 
-# ── 調色盤（dataviz 參考實例，已跑 validate_palette.js：全 PASS，aqua 對比 WARN → 直接標籤＋表格檢視作為 relief）
-S1, S2, S3 = "#2a78d6", "#eb6834", "#1baf7a"
+# ── 調色盤（dataviz 參考實例，validate_palette.js 全 PASS）
+#
+# 色彩只編碼「實體」，不編碼「排名」或「順序位置」。
+# 兩張圖畫的都是同一個實體（Hami Video），所以**不使用類別色相區分**：
+#   A：三格全部同一個藍——三場賽事是同一個品牌的三段時間，不是三個實體。
+#   C：同色相的兩個明度階（序數）——週與日是同一份資料的兩種聚合，不是兩件事。
+#      深＝日資料（揭露），淺＝週資料（抹平者），明度差本身就在講「粗細」。
+# 驗證：`node validate_palette.js "#86b6ef,#1c5cab" --mode light --ordinal` → 全 PASS
+#      （單色 #2a78d6 categorical 亦全 PASS，含對比 ≥3:1）
+S1 = "#2a78d6"                       # A：唯一系列色
+C_COARSE, C_FINE = "#86b6ef", "#1c5cab"   # C：blue 250 / 550，序數兩階
+C_COARSE_FILL = "rgba(134,182,239,0.22)"
 SURFACE, INK, INK2, MUTED = "#fcfcfb", "#0b0b0b", "#52514e", "#898781"
 GRID, AXIS = "#e1e0d9", "#c3c2b7"
 SHADE = "rgba(11,11,11,0.055)"          # 賽程陰影：中性，不佔用類別色
@@ -121,7 +134,9 @@ figA.update_xaxes(range=[XLO - .35, AHI + .35], dtick=2, title_text="峰值後�
 figA.update_yaxes(range=[0, 1.14], tickformat=".0%", showgrid=True, gridcolor=GRID,
                   gridwidth=1, zeroline=False, linecolor=AXIS,
                   tickfont=dict(size=11.5, color=MUTED))
-figA.update_yaxes(title_text="相對於該場峰值", row=1, col=1)
+# 縱軸標題已移除（旋轉中文不易讀）。改放進圖上方的說明文字，而不是水平標籤：
+# 水平標籤要放在 y 軸頂端，而該處已被第一格的 subplot 標題佔住——實測兩者在 1180px
+# 容器下僅差約 8px，會撞。說明文字在圖正上方，零碰撞風險且資訊不流失。
 figA.update_layout(height=430, **BASE_LAYOUT)
 for a in figA.layout.annotations[:3]:
     a.font = dict(size=13.5, color=INK, family=FONT)
@@ -178,38 +193,6 @@ rowsA = "".join(
 tableA = ("<table><tr><th>賽事</th><th>峰值指數</th><th>賽程(週)</th><th>賽前基準</th>"
           f"<th>回到基準(週)</th><th>回歸後三週的值</th></tr>{rowsA}</table>")
 
-# ══════════════════════════════ B：疊合正規化曲線（對照） ══════════════════════════════
-figB = go.Figure()
-for e, col in zip(EVENTS, [S1, S2, S3]):
-    xs = [x for x in e["x"] if 0 <= x <= 12]
-    ys = [e["y"][e["x"].index(x)] for x in xs]
-    figB.add_trace(go.Scatter(x=xs, y=ys, mode="lines+markers", name=e["name"],
-                              line=dict(color=col, width=2),
-                              marker=dict(size=8, color=col, line=dict(color=SURFACE, width=2)),
-                              hovertemplate="%{fullData.name}<br>第 %{x} 週：峰值的 %{y:.1%}<extra></extra>"))
-    figB.add_annotation(x=xs[-1], y=ys[-1], text=e["name"], showarrow=False, xanchor="left",
-                        xshift=8, font=dict(size=11.5, color=INK2))
-figB.add_vrect(x0=3, x1=12, fillcolor=SHADE, line_width=0, layer="below")
-figB.add_annotation(x=7.5, y=.55, text="第 3 週後三條全部壓在 5.6%–6.5%<br>七成畫布零資訊",
-                    showarrow=False, font=dict(size=12, color=MUTED))
-figB.update_xaxes(range=[-.4, 15], dtick=2, title_text="峰值後週數", showgrid=False,
-                  zeroline=False, linecolor=AXIS, ticks="outside", tickcolor=AXIS,
-                  ticklen=4, tickfont=dict(size=11.5, color=MUTED))
-figB.update_yaxes(range=[0, 1.08], tickformat=".0%", title_text="相對於該場峰值",
-                  showgrid=True, gridcolor=GRID, zeroline=False, linecolor=AXIS,
-                  tickfont=dict(size=11.5, color=MUTED))
-figB.update_layout(height=430, legend=dict(orientation="h", y=1.1, x=0,
-                   font=dict(size=12)), **BASE_LAYOUT)
-
-assert_shapes(figB, "draft-B", 1)   # 第 3 週後的灰底區塊
-
-hdrB = "".join(f"<th>{e['name']}</th>" for e in EVENTS)
-rowsB = "".join(
-    "<tr><td>第 %d 週</td>" % w +
-    "".join(f"<td>{e['y'][e['x'].index(w)]:.3f}</td>" for e in EVENTS) + "</tr>"
-    for w in range(0, 13))
-tableB = f"<table><tr><th>峰值後</th>{hdrB}</tr>{rowsB}</table>"
-
 # ══════════════════════════════ C：世足 日 vs 週（方法論） ══════════════════════════════
 d0, d1 = pd.Timestamp("2022-11-01"), pd.Timestamp("2023-01-31")
 dsub = dy[(dy.index >= d0) & (dy.index <= d1)]
@@ -218,12 +201,12 @@ dn, wn = dsub / dsub.max(), wsub / wsub.max()
 
 figC = go.Figure()
 figC.add_trace(go.Scatter(x=wn.index, y=wn.values, mode="lines", name="週資料（5 年查詢）",
-                          line=dict(color=S2, width=2, shape="hv"), fill="tozeroy",
-                          fillcolor="rgba(235,104,52,0.10)", customdata=wsub.values,
+                          line=dict(color=C_COARSE, width=2, shape="hv"), fill="tozeroy",
+                          fillcolor=C_COARSE_FILL, customdata=wsub.values,
                           hovertemplate="週起 %{x|%m/%d}<br>週指數 %{customdata}"
                                         "（該窗峰值的 %{y:.1%}）<extra></extra>"))
 figC.add_trace(go.Scatter(x=dn.index, y=dn.values, mode="lines", name="日資料（3 個月查詢）",
-                          line=dict(color=S1, width=2), customdata=dsub.values,
+                          line=dict(color=C_FINE, width=2), customdata=dsub.values,
                           hovertemplate="%{x|%m/%d}<br>日指數 %{customdata}"
                                         "（該窗峰值的 %{y:.1%}）<extra></extra>"))
 figC.add_annotation(x=pd.Timestamp("2022-12-18"), y=1.0, text="<b>決賽日 12/18　日指數 61</b><br>"
@@ -238,7 +221,7 @@ figC.add_annotation(x=pd.Timestamp("2022-11-03"), y=1.06, text=DISCLAIMER, showa
 figC.update_xaxes(showgrid=False, zeroline=False, linecolor=AXIS, ticks="outside",
                   tickcolor=AXIS, ticklen=4, tickformat="%m/%d",
                   tickfont=dict(size=11.5, color=MUTED))
-figC.update_yaxes(range=[0, 1.15], tickformat=".0%", title_text="各自相對於自己的峰值",
+figC.update_yaxes(range=[0, 1.15], tickformat=".0%",   # 縱軸標題已移除，理由同草稿 A
                   showgrid=True, gridcolor=GRID, zeroline=False, linecolor=AXIS,
                   tickfont=dict(size=11.5, color=MUTED))
 figC.update_layout(height=440, legend=dict(orientation="h", y=1.13, x=0, font=dict(size=12)),
@@ -254,9 +237,11 @@ tableC = f"<table><tr><th>日期</th><th>日指數</th><th>該日所屬週的週
 # ── 輸出
 opts = dict(full_html=False, include_plotlyjs="directory", config={"displayModeBar": False})
 (OUT / "draft-a-small-multiples.html").write_text(shell(
-    "草稿 A｜三場賽事的熱度回歸（主視覺候選）",
+    "草稿 A｜三場賽事的熱度回歸（主視覺）",
     "每格一場賽事。<b>直式陰影＝實際賽程長度</b>（4.0／0.6／2.3 週，等比），"
-    "<b>橫向灰帶＝賽前基準帶</b>，帶上緣的實線是回歸門檻。三格重複同一結構——讀者自己看出模式一致。",
+    "<b>橫向灰帶＝賽前基準帶</b>，帶上緣的實線是回歸門檻。三格重複同一結構——讀者自己看出模式一致。"
+    "<br>縱軸是<b>各場相對於自己的峰值</b>（＝100%），<b>三格不共用絕對尺度</b>；"
+    "三格同一個顏色，因為三場都是同一個品牌的不同時間，不是三個實體。",
     figA.to_html(**opts), tableA,
     "<b>資料</b>：Google Trends 台灣，Hami Video，週解析度，2021-08～2026-07（<code>raw/groupA_brand_5yr.csv</code>，"
     "取於 2026-08-03）。<br><b>基準帶定義</b>：峰值前 26～6 週的 p25–p75。"
@@ -272,18 +257,12 @@ opts = dict(full_html=False, include_plotlyjs="directory", config={"displayModeB
     "小於該幅度的殘留提升看不見。<br>賽事日期未查一手來源，屬待驗事實。"
 ), encoding="utf-8")
 
-(OUT / "draft-b-overlay.html").write_text(shell(
-    "草稿 B｜疊合正規化曲線（對照用，不進交付）",
-    "三條線疊在同一軸上。強調的是「發散」——但發散只是賽程長度的機械翻譯，"
-    "而第 3 週之後三條完全重疊，畫布利用率很差。",
-    figB.to_html(**opts), tableB,
-    "此圖僅供比較設計方向，<b>不進最終交付</b>。同資料來源與限制見草稿 A。"
-), encoding="utf-8")
-
 (OUT / "draft-c-daily-vs-weekly.html").write_text(shell(
     "草稿 C｜同一場世足，日資料與週資料講出不同的故事（方法論，第二張）",
     "週平均把單日爆發抹平了：<b>日資料的最高點是決賽日 12/18，週資料的最高點卻在開幕週</b>。"
-    "解析度的選擇會改變結論。",
+    "解析度的選擇會改變結論。"
+    "<br>兩條線<b>各自相對於自己的峰值</b>（＝100%）。同色相的深淺兩階，"
+    "因為它們是同一份資料的兩種聚合而非兩件事——深＝日，淺＝週。",
     figC.to_html(**opts), tableC,
     "<b>重要</b>：兩條線來自<b>兩次獨立查詢</b>（日＝3 個月窗、週＝5 年窗），"
     "各自正規化，因此<b>只可比形狀與峰值位置，不可比高度</b>。<br>"

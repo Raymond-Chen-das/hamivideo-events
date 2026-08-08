@@ -130,7 +130,7 @@ for W in (900, 1100, 1400):
     fails.extend([f"draft-A @{W}px: {h}" for h in hits + outside])
 
 print("\n" + "=" * 70)
-for name, exp_shapes in [("draft-b-overlay.html", 1), ("draft-c-daily-vs-weekly.html", 0)]:
+for name, exp_shapes in [("draft-c-daily-vs-weekly.html", 0)]:
     d, l, t = layout_of(D / name)
     s = l.get("shapes", [])
     fills = [tr.get("fill") for tr in d if tr.get("fill")]
@@ -139,6 +139,15 @@ for name, exp_shapes in [("draft-b-overlay.html", 1), ("draft-c-daily-vs-weekly.
         fails.append(f"{name} shapes={len(s)}，應為 {exp_shapes}")
 
 print("\n" + "=" * 70)
+EXPECTED = {"draft-a-small-multiples.html", "draft-c-daily-vs-weekly.html", "plotly.min.js"}
+actual = {p.name for p in D.iterdir() if p.is_file()}
+print(f"drafts/ 內容：{sorted(actual)}")
+if actual - EXPECTED:
+    fails.append(f"drafts/ 有非預期檔案：{sorted(actual - EXPECTED)}"
+                 "（草稿 B 已於 2026-08-05 刪除，不得復活）")
+if EXPECTED - actual:
+    fails.append(f"drafts/ 缺少：{sorted(EXPECTED - actual)}")
+
 js = D / "plotly.min.js"
 print(f"plotly.min.js 存在={js.exists()} 大小={js.stat().st_size if js.exists() else 0:,}")
 for f in D.glob("draft-*.html"):
