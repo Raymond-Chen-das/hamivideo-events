@@ -1,5 +1,11 @@
 """Day 1 — 可重現性。依 prompt 第三、四、五節執行。
 硬上限 4 次嘗試（查詢 A 最多 2、查詢 B 最多 2），重試間隔 >= 300s，每次嘗試都記 log。
+
+⚠️ 本檔保留當時實際執行的版本，**不回頭改寫**。
+   其中的退避重試（RETRY_GAP）是執行當下的假設；後續實測推翻了它——
+   配額為觸發式封鎖而非每分鐘節流（0/30 橫跨 47.5 小時，退避與冷卻皆無效），
+   結論改採 fail-fast，見 ``scripts/_data.py`` 與 ``logs/quota_attempts.csv``。
+   若要重新取數，請照該結論辦理，不要沿用本檔的重試迴圈。
 """
 from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]   # repo 根目錄，腳本可隨 repo 搬移
