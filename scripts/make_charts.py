@@ -33,13 +33,29 @@ OUT.mkdir(parents=True, exist_ok=True)
 #      深＝日資料（揭露），淺＝週資料（抹平者），明度差本身就在講「粗細」。
 # 驗證：`node validate_palette.js "#86b6ef,#1c5cab" --mode light --ordinal` → 全 PASS
 #      （單色 #2a78d6 categorical 亦全 PASS，含對比 ≥3:1）
-S1 = "#2a78d6"                       # A：唯一系列色
-C_COARSE, C_FINE = "#86b6ef", "#1c5cab"   # C：blue 250 / 550，序數兩階
-C_COARSE_FILL = "rgba(134,182,239,0.22)"
-SURFACE, INK, INK2, MUTED = "#fcfcfb", "#0b0b0b", "#52514e", "#898781"
-GRID, AXIS = "#e1e0d9", "#c3c2b7"
-SHADE = "rgba(11,11,11,0.055)"          # 賽程陰影：中性，不佔用類別色
-FONT = 'system-ui, -apple-system, "Segoe UI", "Microsoft JhengHei", sans-serif'
+# ══════════════════════════════════════════════════════════════════════════
+#  視覺方向：**量測儀表**（2026-08-09 改版，與姊妹專案共用同一套語言）
+#  深色儀表面 ＋ 數據走等寬字。避開「黑底＋螢光」與「米白＋髮絲線」兩種預設。
+#  驗證：node validate_palette.js "#3987e5" --mode dark --surface "#0f1720" → PASS
+#        node validate_palette.js "#1c5cab,#9ec5f4" --mode dark --surface "#0f1720"
+#          --ordinal → PASS
+# ══════════════════════════════════════════════════════════════════════════
+S1 = "#3987e5"                            # 主圖：唯一系列色（三格同一實體）
+# ⚠️ 深色底下明度語意**方向相反**：亮的才是突出的那一個。
+# 所以 日資料（揭露者）＝亮，週資料（抹平者）＝暗。明度差仍在講「聚合粗細」。
+C_FINE, C_COARSE = "#9ec5f4", "#1c5cab"
+C_COARSE_FILL = "rgba(28,92,171,0.30)"
+
+PLANE = "#0a0f16"
+SURFACE = "#0f1720"
+HAIR = "rgba(255,255,255,0.09)"
+INK, INK2, MUTED = "#e6edf5", "#9fb0c4", "#67788d"
+GRID, AXIS = "rgba(255,255,255,0.065)", "rgba(255,255,255,0.20)"
+SHADE = "rgba(255,255,255,0.055)"       # 賽程陰影：中性，不佔用類別色
+FONT = ('system-ui, -apple-system, "Segoe UI", "Noto Sans TC", '
+        '"Microsoft JhengHei", sans-serif')
+MONO = ('ui-monospace, "Cascadia Mono", "SF Mono", Consolas, '
+        '"Noto Sans Mono CJK TC", monospace')
 DISCLAIMER = "搜尋熱度 ≠ 訂閱數"
 
 # ── 資料
@@ -92,31 +108,54 @@ def shell(title, sub, figdiv, table_html, extra="", more=""):
                  f'<p class="foot">{more}</p></details>') if more else ""
     return f"""<meta charset="utf-8"><title>{title}</title>
 <style>
- body{{margin:0;background:#f9f9f7;color:{INK};font-family:{FONT};}}
- .wrap{{max-width:1180px;margin:0 auto;padding:32px 20px 64px;}}
- h1{{font-size:21px;font-weight:650;margin:0 0 6px;letter-spacing:-.01em;}}
- .sub{{font-size:13.5px;color:{INK2};margin:0 0 22px;line-height:1.65;}}
- .card{{background:{SURFACE};border:1px solid rgba(11,11,11,.10);border-radius:10px;padding:8px 6px 4px;
+ *{{box-sizing:border-box;}}
+ body{{margin:0;background:{PLANE};color:{INK};font-family:{FONT};
+      line-height:1.72;letter-spacing:.005em;
+      background-image:radial-gradient(1000px 400px at 20% -8%,
+        rgba(57,135,229,.15),transparent 62%);
+      background-attachment:fixed;}}
+ .wrap{{max-width:1180px;margin:0 auto;padding:52px 22px 88px;}}
+ .eyebrow{{font-family:{MONO};font-size:11.5px;letter-spacing:.16em;
+         text-transform:uppercase;color:{MUTED};display:block;margin-bottom:10px;}}
+ h1{{font-size:clamp(24px,3.6vw,34px);font-weight:800;margin:0 0 14px;
+    letter-spacing:-.025em;line-height:1.26;}}
+ .sub{{font-size:14px;color:{INK2};margin:0 0 24px;line-height:1.8;max-width:76ch;}}
+ .sub b{{color:{INK};font-weight:650;}}
+ .card{{background:{SURFACE};border:1px solid {HAIR};border-radius:14px;
+       padding:14px 10px 8px;
        /* 圖表在自己的容器裡橫向捲動，頁面本體永不橫向捲動。
           三格 small multiples 壓進 375px 手機寬時，子標題會擠成一團——
           給最小寬度讓使用者左右滑，比壓扁誠實。（2026-08-09 實機寬度驗證後加入） */
        overflow-x:auto;-webkit-overflow-scrolling:touch;}}
  .card > div{{min-width:760px;}}
- .scrollhint{{display:none;font-size:11.5px;color:{MUTED};margin:6px 2px 0;}}
+ .scrollhint{{display:none;font-size:12px;color:{MUTED};margin:8px 2px 0;
+            font-family:{MONO};}}
  @media (max-width:640px){{
-   .wrap{{padding:22px 14px 48px;}}
-   h1{{font-size:18px;}}
-   .sub{{font-size:12.5px;}}
+   .wrap{{padding:30px 15px 56px;}}
+   .sub{{font-size:13px;}}
    .scrollhint{{display:block;}}
-   .foot{{font-size:11.5px;}}
+   .foot{{font-size:12px;}}
    code{{word-break:break-all;}}
  }}
- details{{margin-top:22px;}} summary{{cursor:pointer;font-size:13px;color:{INK2};padding:6px 0;}}
- table{{border-collapse:collapse;font-size:12.5px;margin-top:10px;font-variant-numeric:tabular-nums;}}
- th,td{{border-bottom:1px solid {GRID};padding:5px 12px 5px 0;text-align:right;}}
- th:first-child,td:first-child{{text-align:left;}} th{{color:{MUTED};font-weight:550;}}
- .foot{{font-size:12px;color:{MUTED};margin-top:20px;line-height:1.7;}}
- .foot b{{color:{INK2};font-weight:600;}}
+ details{{margin-top:24px;border-top:1px solid {HAIR};padding-top:6px;}}
+ summary{{cursor:pointer;font-size:13px;color:{INK2};padding:8px 0;
+         font-family:{MONO};letter-spacing:.02em;}}
+ summary:hover{{color:{INK};}}
+ summary:focus-visible{{outline:2px solid {S1};outline-offset:3px;}}
+ table{{border-collapse:collapse;font-size:12.5px;margin-top:10px;
+      font-variant-numeric:tabular-nums;}}
+ th,td{{border-bottom:1px solid {HAIR};padding:7px 14px 7px 0;text-align:right;}}
+ th:first-child,td:first-child{{text-align:left;}}
+ th{{color:{MUTED};font-weight:600;font-family:{MONO};font-size:11px;
+    letter-spacing:.06em;text-transform:uppercase;}}
+ code{{font-family:{MONO};font-size:12px;background:rgba(255,255,255,.06);
+     padding:2px 6px;border-radius:5px;color:{INK2};}}
+ .foot{{font-size:12.5px;color:{MUTED};margin-top:24px;line-height:1.85;
+      max-width:88ch;}}
+ .foot b{{color:{INK2};font-weight:650;}}
+ @keyframes rise{{from{{opacity:0;transform:translateY(12px);}}to{{opacity:1;transform:none;}}}}
+ .card{{animation:rise .55s cubic-bezier(.22,.7,.3,1) both;}}
+ @media (prefers-reduced-motion: reduce){{*{{animation:none !important;}}}}
 </style>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <div class="wrap"><h1>{title}</h1><p class="sub">{sub}</p>
@@ -146,7 +185,8 @@ for c, e in enumerate(EVENTS, start=1):
     figA.add_vrect(x0=e["x0"], x1=e["x1"], row=1, col=c,
                    fillcolor=SHADE, line_width=0, layer="below")
     figA.add_hrect(y0=e["blo_n"], y1=e["bhi_n"], row=1, col=c,
-                   fillcolor="rgba(11,11,11,0.10)", line_width=0, layer="below")
+                   # 基準帶：深色底上要用亮色薄膜，不是暗色（原本假設淺底）
+                   fillcolor="rgba(255,255,255,0.10)", line_width=0, layer="below")
     figA.add_hline(y=e["bhi_n"], row=1, col=c, line=dict(color=AXIS, width=1.5))
     xr = f"x{c if c > 1 else ''}"; yr = f"y{c if c > 1 else ''}"
     figA.add_annotation(x=0, y=1.0, xref=xr, yref=yr, text=f"<b>峰值 {e['peak_val']}</b>",
