@@ -2,47 +2,46 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>專案摘要｜Hami Video 賽事熱度衰退</title>
 <style>
-@page { size: A4; margin: 10mm 11mm; }
 *{box-sizing:border-box;}
-body{margin:0;background:#f4f4f2;color:#0b0b0b;font-family:system-ui, -apple-system, "Segoe UI", "Microsoft JhengHei", sans-serif;line-height:1.5;
-     font-size:11.8px;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
-.page{max-width:900px;margin:0 auto;background:#fff;padding:24px 28px 20px;}
+body{margin:0;background:#dce9f3;color:#0d1f2d;font-family:system-ui, -apple-system, "Segoe UI", "Microsoft JhengHei", sans-serif;line-height:1.5;
+     font-size:11.8px;}
+.page{max-width:900px;margin:0 auto;background:#f2f8fc;border:1px solid rgba(20,54,84,.14);border-radius:16px;padding:24px 28px 20px;}
 h1{font-size:19px;font-weight:660;margin:0 0 3px;letter-spacing:-.01em;}
-.sub{font-size:11.5px;color:#898781;margin:0 0 16px;}
+.sub{font-size:11.5px;color:#6b8299;margin:0 0 16px;}
 h2{font-size:13px;font-weight:650;margin:13px 0 5px;padding-bottom:4px;
-   border-bottom:1.5px solid #0b0b0b;}
-.hero{background:#fafafa;border-left:3px solid #2a78d6;padding:13px 17px;}
+   border-bottom:1.5px solid #0d1f2d;}
+.hero{background:#e8f1f8;border-left:3px solid #2a78d6;padding:15px 19px;
+      border-radius:0 10px 10px 0;}
 .big{font-size:23px;font-weight:680;letter-spacing:-.015em;line-height:1.35;color:#2a78d6;}
-.verdict{font-size:12.3px;color:#52514e;margin-top:7px;padding-top:7px;
-         border-top:1px solid #e1e0d9;}
+.verdict{font-size:12.3px;color:#3d5568;margin-top:7px;padding-top:7px;
+         border-top:1px solid rgba(20,54,84,0.10);}
 /* 滿版。曾為了把 PDF 擠進一頁而縮到 78%，但使用者「兩頁無所謂，視覺化要佳」——
    這張圖是整份摘要的視覺重心，為了頁數把它縮小是本末倒置。 */
-.fig{width:100%;display:block;margin:11px auto 0;border:1px solid #e1e0d9;border-radius:7px;}
+.fig{width:100%;display:block;margin:11px auto 0;border:1px solid rgba(20,54,84,0.10);border-radius:7px;}
 table{border-collapse:collapse;width:100%;font-size:11.5px;margin-top:5px;
       font-variant-numeric:tabular-nums;}
-th,td{border-bottom:1px solid #e1e0d9;padding:6px 9px 6px 0;text-align:left;
+th,td{border-bottom:1px solid rgba(20,54,84,0.10);padding:6px 9px 6px 0;text-align:left;
       vertical-align:top;}
-th{color:#898781;font-weight:600;font-size:11px;}
+th{color:#6b8299;font-weight:600;font-size:11px;}
 td.hit{font-weight:660;color:#2a78d6;}
 td.cap{font-weight:640;width:150px;}
-td.where{color:#898781;font-size:10.3px;width:180px;font-family:ui-monospace,monospace;}
+td.where{color:#6b8299;font-size:10.3px;width:180px;font-family:ui-monospace,monospace;}
 .anchor{background:#fbf9f4;border:1px solid #e6e0cf;border-radius:7px;
         padding:8px 12px;font-size:11.2px;margin-top:7px;}
 .honest{background:#fdf7f7;border:1px solid #eedcdc;border-radius:7px;
         padding:10px 14px;font-size:11.5px;}
-.honest b{color:#b03030;}
+.honest b{color:#c0392b;}
 ul{margin:5px 0 0;padding-left:17px;} li{margin:3px 0;}
 code{font-size:10.5px;background:#f0f0ee;padding:0 3px;border-radius:3px;}
-.foot{margin-top:15px;padding-top:9px;border-top:1px solid #e1e0d9;
-      font-size:10.3px;color:#898781;}
+.foot{margin-top:15px;padding-top:9px;border-top:1px solid rgba(20,54,84,0.10);
+      font-size:10.3px;color:#6b8299;}
 .qrbar{display:flex;align-items:center;gap:14px;margin-top:14px;padding-top:11px;
-       border-top:1px solid #e1e0d9;}
+       border-top:1px solid rgba(20,54,84,0.10);}
 .qrbar img{width:74px;height:74px;flex:none;}
-.qrtext{font-size:11px;color:#52514e;line-height:1.55;}
-.qrtext b{color:#0b0b0b;}
-.qrtext .u{font-family:ui-monospace,monospace;font-size:10px;color:#898781;
+.qrtext{font-size:11px;color:#3d5568;line-height:1.55;}
+.qrtext b{color:#0d1f2d;}
+.qrtext .u{font-family:ui-monospace,monospace;font-size:10px;color:#6b8299;
            word-break:break-all;}
-@media print{ body{background:#fff;} .page{padding:0;max-width:none;} }
 </style>
 <div class="page">
 
@@ -65,7 +64,7 @@ code{font-size:10.5px;background:#f0f0ee;padding:0 3px;border-radius:3px;}
       <th>賽前基準帶</th><th>回到基準</th></tr>
   <tr><td>2022 世界盃</td><td>4.0</td><td>36</td><td>36.0×</td><td>1–2</td><td class='hit'>5 週</td></tr><tr><td>2023 WBC</td><td>0.6</td><td>32</td><td>16.0×</td><td>1–2</td><td class='hit'>3 週</td></tr><tr><td>2024 巴黎奧運</td><td>2.3</td><td>46</td><td>23.0×</td><td>2–3</td><td class='hit'>3 週</td></tr>
 </table>
-<p style="font-size:11.5px;color:#52514e;margin:8px 0 0;">
+<p style="font-size:11.5px;color:#3d5568;margin:8px 0 0;">
 <b>重點不是任何單一數字。</b> 爆發倍率的分母（賽前基準）本身在漂移，跨年比較並不乾淨；
 真正硬的是<b>三場都在 3–5 週內回到基準帶</b>——賽程長度從 0.6 週到 4.0 週，
 結果卻一致。衰退<b>形狀</b>的差異幾乎完全是賽程長度的機械後果，不是主要發現。</p>

@@ -1,0 +1,14 @@
+# Python 3.13（本機實測 3.13.3）
+#   py -3.13 -m venv .venv
+#   .\.venv\Scripts\python.exe -m pip install -r requirements.txt
+#
+# pytrends 只有 scripts/fetch_day*.py 需要，而那兩支會消耗 Google Trends 配額。
+# 分析、圖表、摘要與測試都不需要它。
+
+pandas==2.3.3
+plotly==6.9.0
+pytest==9.1.1
+segno==1.6.6        # 摘要頁的 QR code
+
+# 取數用（選用，會消耗配額——先讀 docs/prompt-verify-google-trends.md）
+# pytrends==4.9.2

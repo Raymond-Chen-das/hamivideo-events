@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""一頁視覺化摘要（快速摘要用）。零 API 請求，只讀 raw/ 既有 CSV。
+"""一頁視覺化摘要（快速摘要頁）。零 API 請求，只讀 raw/ 既有 CSV。
 
 **所有數字由資料算出，不得寫死。** 專案 A 在這件事上踩過兩次：
 看板 hero 的百分比寫成字面值，資料更新後與圖靜靜分家。
@@ -12,8 +12,6 @@
 
 用法：
     python scripts/build_onepager.py
-    # 轉 PDF（需要 Edge）：
-    # msedge --headless=new --print-to-pdf=onepager.pdf --no-pdf-header-footer <file>
 """
 from pathlib import Path
 
@@ -66,8 +64,9 @@ VERDICT = ("賽事熱度在賽後 1–2 週內完全回到賽前基準，三場�
            "——在這份資料的解析度下觀測不到任何殘留提升。")
 
 TELCO_C, ACCENT = "#2a78d6", "#eb6834"
-INK, INK2, MUTED = "#0b0b0b", "#52514e", "#898781"
-GRID, CRIT = "#e1e0d9", "#b03030"
+PLANE, SURFACE = "#dce9f3", "#f2f8fc"
+INK, INK2, MUTED = "#0d1f2d", "#3d5568", "#6b8299"
+GRID, CRIT = "rgba(20,54,84,0.10)", "#c0392b"
 FONT = 'system-ui, -apple-system, "Segoe UI", "Microsoft JhengHei", sans-serif'
 
 # 摘要就是摘要：每項一句話。展開的版本在 README 與 decision-trail，這裡只給指路。
@@ -139,16 +138,16 @@ def build(s, rows) -> str:
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>專案摘要｜Hami Video 賽事熱度衰退</title>
 <style>
-@page {{ size: A4; margin: 10mm 11mm; }}
 *{{box-sizing:border-box;}}
-body{{margin:0;background:#f4f4f2;color:{INK};font-family:{FONT};line-height:1.5;
-     font-size:11.8px;-webkit-print-color-adjust:exact;print-color-adjust:exact;}}
-.page{{max-width:900px;margin:0 auto;background:#fff;padding:24px 28px 20px;}}
+body{{margin:0;background:{PLANE};color:{INK};font-family:{FONT};line-height:1.5;
+     font-size:11.8px;}}
+.page{{max-width:900px;margin:0 auto;background:{SURFACE};border:1px solid rgba(20,54,84,.14);border-radius:16px;padding:24px 28px 20px;}}
 h1{{font-size:19px;font-weight:660;margin:0 0 3px;letter-spacing:-.01em;}}
 .sub{{font-size:11.5px;color:{MUTED};margin:0 0 16px;}}
 h2{{font-size:13px;font-weight:650;margin:13px 0 5px;padding-bottom:4px;
    border-bottom:1.5px solid {INK};}}
-.hero{{background:#fafafa;border-left:3px solid {TELCO_C};padding:13px 17px;}}
+.hero{{background:#e8f1f8;border-left:3px solid {TELCO_C};padding:15px 19px;
+      border-radius:0 10px 10px 0;}}
 .big{{font-size:23px;font-weight:680;letter-spacing:-.015em;line-height:1.35;color:{TELCO_C};}}
 .verdict{{font-size:12.3px;color:{INK2};margin-top:7px;padding-top:7px;
          border-top:1px solid {GRID};}}
@@ -179,7 +178,6 @@ code{{font-size:10.5px;background:#f0f0ee;padding:0 3px;border-radius:3px;}}
 .qrtext b{{color:{INK};}}
 .qrtext .u{{font-family:ui-monospace,monospace;font-size:10px;color:{MUTED};
            word-break:break-all;}}
-@media print{{ body{{background:#fff;}} .page{{padding:0;max-width:none;}} }}
 </style>
 <div class="page">
 

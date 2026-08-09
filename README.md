@@ -1,235 +1,184 @@
 # hamivideo-events
 
-## **A tournament produces a pulse, not a step.**
+## 賽事帶來的是脈衝，不是階梯。
 
-Across three international tournaments, search interest in Hami Video (Chunghwa
-Telecom's streaming service) returns to its pre-event baseline **within 1–2 weeks
-of the final whistle — every time.** At this data's resolution, no residual lift
-survives the event.
+三場國際賽事之後，Hami Video（中華電信影視平台）的搜尋熱度都在**賽後 1–2 週內回到賽前基準**，
+三場皆然。在這份資料的解析度下，觀測不到任何殘留提升。
 
-![Three tournaments, one brand: each panel shows the decay back to the pre-event baseline band, with the shaded column marking actual tournament length](docs/images/chart-decay.png)
+![三場賽事、同一個品牌：每格顯示熱度衰退回賽前基準帶，直式陰影標出實際賽程長度](docs/images/chart-decay.png)
 
-<sup>**▶ [Open the live chart](https://raymond-chen-das.github.io/hamivideo-events/)**
-— interactive, works on a phone. Same page as
-[`charts/decay-by-event.html`](charts/decay-by-event.html), which opens offline.</sup>
+<sup>**▶ [開啟線上圖表](https://raymond-chen-das.github.io/hamivideo-events/)**
+（互動版）。與 [`charts/decay-by-event.html`](charts/decay-by-event.html) 同一頁，可離線開啟。</sup>
 
-**Two-page summary for screening:** [`charts/onepager.html`](charts/onepager.html)
-· [`charts/onepager.pdf`](charts/onepager.pdf). Every figure on it is recomputed
-from the snapshot at build time and reconciled against the numbers published in the
-delivery spec — the build fails if they disagree.
+**快速摘要頁**：[`charts/onepager.html`](charts/onepager.html)。
+頁上每個數值都在產生時從快照重新計算，並與交付規格公布的數字對帳——對不上就中止。
 
-## What
+## 這是什麼
 
-If a tournament permanently lifted attention, the curve would settle at a new,
-higher level — a *step*. It does not. It spikes and falls back — a *pulse*. That
-is the whole result, and it holds in all three cases.
+如果賽事永久拉高了關注度，曲線會停在一個較高的新水準，那是**階梯**。它沒有。
+它衝上去然後掉回來，那是**脈衝**。這就是全部的結果，而且三場都成立。
 
-The differences in decay *shape* between the three events are almost entirely a
-mechanical consequence of how long each tournament ran. The non-trivial result is
-the convergence, not the divergence.
+三場之間衰退**形狀**的差異，幾乎完全是賽程長度的機械後果。值得注意的是它們的收斂，不是分歧。
 
-**One external reference point.** Chunghwa Telecom's own press release
-(2023-03-24) reported Hami Video subscriptions up **11.2× year-on-year** during
-the WBC. The burst ratio computed here from search interest alone is **16.0×**.
-⚠️ **These are different quantities** — theirs is subscriptions YoY, this is peak
-÷ pre-event baseline median — **so they cannot be compared directly and no
-agreement is claimed.** What can be said is that the orders of magnitude are
-close, which is weak external evidence that search interest tracks something
-real. It is the only outside anchor available for the "search interest is not
-subscriptions" limitation below.
+**唯一的外部參照。** 中華電信官方新聞稿（2023-03-24）公布 WBC 期間 Hami Video
+訂閱數較去年同期成長 **11.2 倍**；本分析單以搜尋熱度算出的 WBC 爆發倍率是 **16.0×**。
+⚠️ **兩者是不同的量**——官方是訂閱數 YoY，這裡是峰值 ÷ 賽前基準中位數——
+**不可直接比較，也不宣稱吻合**。可以說的是量級相近，構成「搜尋熱度追蹤到某個真實東西」的
+弱外部證據。這是目前唯一能為下方限制第 1 條提供外部參照的資料點。
 
-## Method
+## 原始資料的取得
 
-**Signal.** Google Trends, geo `TW`, keyword `Hami Video`, weekly resolution,
-2021-08-01 → 2026-07-26 (n = 261 weeks, 0.0% zero values). All five brand keywords
-were queried together so the three events share one normalization scale and are
-therefore directly comparable — this is the reason weekly is the primary unit, not
-daily.
+**原始快照不隨本 repo 散布。** `data/raw/*.csv` 由 `pytrends` 取得，
+而它連的是 Google Trends 的非官方端點。Google 的服務條款是否允許再散布取回的序列，
+我沒有查證過，所以選擇排除，而不是假設沒問題。
 
-**Metrics, registered before looking at the data.**
+讀懂這個專案不需要它們。圖表、摘要與本文所有數字都是已提交的靜態產物：
 
-| Quantity | Definition |
+| 不需要原始資料就能看的東西 | |
 |---|---|
-| Peak week | Highest weekly value within ±2 weeks of the tournament window |
-| Pre-event baseline band | p25–p75 of weeks −26 to −6 relative to the peak |
-| Burst ratio | Peak ÷ baseline median |
-| Weeks to baseline | First week after the peak at or below the band's upper edge (p75) |
+| [`charts/decay-by-event.html`](charts/decay-by-event.html) | 主圖 |
+| [`charts/daily-vs-weekly.html`](charts/daily-vs-weekly.html) | 方法圖 |
+| [`charts/onepager.html`](charts/onepager.html) | 摘要 |
+| 本 README | 全部結果數字 |
 
-Percentiles rather than min–max: the WBC baseline window still overlaps the World
-Cup (max = 36), which would inflate a min–max band into something meaningless.
-The original 8-week definition was found to be contaminated the same way; the
-corrected definition is documented as a post-hoc revision in
-[`docs/decision-trail.md`](docs/decision-trail.md), with the pre-registered numbers
-kept intact.
+要重新取得快照，`scripts/fetch_day1.py` 會重跑採集。**動手前先讀**
+[`docs/prompt-verify-google-trends.md`](docs/prompt-verify-google-trends.md)：
+**配額是觸發式封鎖，不是每分鐘節流**——實測踩線後 0/30 橫跨 47.5 小時，
+退避與閒置冷卻皆無效。**不要迴圈重試。**
 
-**Cross-check at daily resolution.** One event window was also pulled daily
-(2022-11-01 → 2023-01-31). It shows that weekly aggregation hides single-day
-spikes: the World Cup final (2022-12-18) reads **61** daily but only **9** in the
-week containing it. Weekly therefore places the peak in the *opening* week, daily
-in the *final*. Both charts ship — the disagreement is part of the result.
+每一支讀取快照的腳本都經過 `scripts/_data.py`，缺檔時會**明確指出缺哪個檔、怎麼重生**，
+而不是丟一個裸的 `FileNotFoundError`。唯一需要真實資料的測試會 skip 並說明理由，
+其餘 13 項照跑。
 
-## Data availability
+採集時間戳（`data/raw/run1_timestamp.txt`）**有**進版控——它是來源紀錄，不是資料。
 
-**The raw snapshots are not distributed with this repository.** `data/raw/*.csv` were
-collected with `pytrends`, which talks to an unofficial Google Trends endpoint. Whether
-Google's terms permit redistributing the returned series is not something I have
-confirmed, so the files are excluded rather than assumed to be fine.
+## 方法
 
-Nothing you need in order to read this project depends on them. The charts, the
-summary and every number in this README are static artefacts, committed and complete:
+**訊號。** Google Trends，地區 `TW`，關鍵字 `Hami Video`，週解析度，
+2021-08-01 → 2026-07-26（n = 261 週）。五個品牌關鍵字一次查詢，
+所以三場賽事共用同一個正規化尺度、可直接相互比較——這也是主線用週而非日的原因。
 
-| Available without the raw data | |
+**看資料前登記的量。**
+
+| 量 | 定義 |
 |---|---|
-| [`charts/decay-by-event.html`](charts/decay-by-event.html) | primary chart |
-| [`charts/daily-vs-weekly.html`](charts/daily-vs-weekly.html) | method chart |
-| [`charts/onepager.html`](charts/onepager.html) · [`.pdf`](charts/onepager.pdf) | summary |
-| this README | all result figures |
+| 峰值週 | 賽事窗前後各 2 週內的最高週值 |
+| 賽前基準帶 | 峰值前第 26 至第 6 週的 p25–p75 |
+| 爆發倍率 | 峰值 ÷ 基準中位數 |
+| 回到基準的週數 | 峰值後首次落回帶上緣（p75）所需的週數 |
 
-To regenerate the snapshots, `scripts/fetch_day1.py` re-runs the collection. Read
-[`docs/prompt-verify-google-trends.md`](docs/prompt-verify-google-trends.md) first:
-**the rate limit is a triggered block, not per-minute throttling** — measured at 0/30
-successes across 47.5 hours once tripped, with backoff and idle cooldown both
-ineffective. Do not loop on retries.
+用分位數而非 min–max：WBC 的基準窗仍與世界盃重疊（max = 36），
+min–max 會把基準帶撐成無意義的寬帶。原本 8 週的定義也被同樣的方式污染；
+修正版在 [`docs/decision-trail.md`](docs/decision-trail.md) 中**明確標示為事後修正**，
+預先登記的原始數字保留不刪。
 
-Every script that reads a snapshot goes through `scripts/_data.py`, which **fails with
-an explicit message naming the missing file and how to regenerate it** rather than a
-bare `FileNotFoundError`. The one test that needs real data skips, with its reason
-stated; the other 13 run normally.
+**日級解析度的交叉檢查。** 其中一個事件窗另外以日解析度取得（2022-11-01 → 2023-01-31）。
+它顯示週聚合會抹掉單日爆發：世界盃決賽日（2022-12-18）日指數 **61**，
+而包含該日的那一週只有 **9**。所以週級把峰值判在**開幕週**，日級判在**決賽日**。
+兩張圖都交付——這個分歧本身就是結果。
 
-The collection timestamp (`data/raw/run1_timestamp.txt`) *is* tracked — it is
-provenance, not data.
+## 如何重跑
 
-## Reproduce
-
-Requires Python 3.13, `pandas`, `plotly`. No network access needed — the charts and
-summary rebuild from snapshots if you have them, and the committed artefacts stand on
-their own if you do not.
+需要 Python 3.13。不需要網路——圖表與摘要在有快照時可重建，沒有快照時已提交的產物本身就成立。
 
 ```bash
-pytest -q                                    # 14 tests over the metrics the results depend on
-python scripts/analysis_weekly_main.py       # main result: the table below
-python scripts/analysis_daily_vs_weekly.py   # weekly-smoothing check + baseline revision
-python scripts/analysis_alignment.py         # peak-aligned vs end-aligned comparison
-python scripts/make_charts.py                # regenerate the charts (asserts as it builds)
-python scripts/verify_charts.py              # verify the written HTML, not the in-memory figure
+py -3.13 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+
+pytest -q                                    # 14 項測試，蓋住結論所依賴的量
+python scripts/analysis_weekly_main.py       # 主線結果：下方表格
+python scripts/analysis_daily_vs_weekly.py   # 週級抹平查核＋基準窗修正
+python scripts/analysis_alignment.py         # 峰值對齊 vs 賽事結束對齊
+python scripts/make_charts.py                # 重新產生圖表（產生時即斷言）
+python scripts/verify_charts.py              # 驗證寫出的 HTML，不是記憶體裡的物件
+python scripts/build_onepager.py             # 摘要頁
 ```
 
-`scripts/metrics.py` holds the four quantities the conclusions rest on
-(`half_life`, `spike_ratio`, `periods_to_threshold`, `baseline_band`). They are
-tested because each has a path that changes the answer without raising: a
-half-life that is never reached returns `None` (not zero, and not "fast"), and a
-spike ratio over an all-zero median returns `inf`. One test deliberately pins the
-*breakdown point* of the baseline band — under roughly a quarter contamination the
-p25–p75 window stops being robust, so the definition is not unconditionally safe
-for events spaced closer together than these three.
+`scripts/metrics.py` 收著結論所依賴的四個量（`half_life`、`spike_ratio`、
+`periods_to_threshold`、`baseline_band`）。它們有測試，因為每一個都有**會改變答案卻不會報錯**
+的路徑：永遠回不到一半的半衰期回傳 `None`（不是 0，也不是「很快」），
+中位數為 0 時的尖峰比回傳 `inf`。其中一項測試刻意釘住基準帶的**崩潰點**——
+污染超過約四分之一時，p25–p75 這個窗就不再穩健，所以該定義對間隔更近的賽事並非無條件安全。
 
-`scripts/fetch_day*.py` hit the Google Trends API and **consume quota** — do not run
-them without reading [`docs/prompt-verify-google-trends.md`](docs/prompt-verify-google-trends.md)
-first. Everything else is offline.
+`scripts/fetch_day*.py` 會打 Google Trends API 並**消耗配額**。
 
-`verify_charts.py` parses the generated HTML and checks shape geometry, annotation
-collisions at three container widths, overflow beyond the plot area, **annotations
-crossed by the data lines**, and that no annotation refers to an element that does
-not exist. Each of those checks exists because a silent failure got through once:
-`add_vrect`/`add_hline` default to `exclude_empty_subplots=True` and drop shapes on
-a subplot that has no traces yet — no error, no warning; and the annotation-vs-line
-check was added after a rendered screenshot showed the disclaimer sitting directly
-under the rising edge in all three panels while the verifier reported no collisions.
+`verify_charts.py` 解析產生出的 HTML，檢查 shape 幾何、三種容器寬度下的標註碰撞、
+超出繪圖區、**標註是否被資料線穿過**，以及註記是否指涉不存在的元素。
+每一項檢查的存在都是因為曾經有一個沉默的失敗溜過去：
+`add_vrect`／`add_hline` 的 `exclude_empty_subplots` 預設為 True，
+會把加在還沒有 trace 的 subplot 上的 shape 丟掉——不報錯、不警告；
+而「標註 vs 資料線」這一項，是在渲染截圖顯示免責小字被三格的陡升段整個穿過、
+而驗證器卻回報無碰撞之後才補上的。
 
-**What this project got wrong first.** The verifier passing did not mean the charts
-were right — it meant they passed the checks that existed. Six times in this repo
-and its sibling, a check claimed more rigour than it performed: tolerance cases
-folded into a pass count, a comment promising row-by-row comparison that only
-compared totals, autorange silently disabling a geometric check, buffer counts
-double-added across plan nodes. Every one surfaced at the moment the output was put
-in front of a person. The rule that came out of it: **any number or pixel that
-reaches a deliverable needs a verification path independent of the code that
-produced it** — a rendered screenshot, a known-bad input, a checksum.
+## 這個專案先做錯了什麼
 
-## Results
+驗證器通過不代表圖是對的——只代表它通過了當時存在的那些檢查。
+在本 repo 與姊妹專案裡，有六次某個檢查宣稱的嚴謹度高於它實際做到的：
+容差內的案例被併進通過數、註解承諾逐列比對但只比了總和、autorange 讓幾何檢查靜默失效、
+EXPLAIN 的 buffers 被跨節點重複加總。**每一次都是在把產出擺到人眼前的那一刻才浮現。**
 
-| Tournament | Duration | Peak | Burst ratio | Baseline band | Weeks to baseline |
+由此得到的規則是：**任何進入交付物的數字或畫面，都需要一條獨立於產生它的程式碼的驗證管道**——
+渲染截圖、已知會失敗的輸入、校驗碼。
+
+## 結果
+
+| 賽事 | 賽程 | 峰值 | 爆發倍率 | 賽前基準帶 | 回到基準 |
 |---|---|---|---|---|---|
-| 2022 FIFA World Cup | 4.0 wk | 36 | 36.0× | 1–2 | 5 |
-| 2023 WBC (Taiwan games) | 0.6 wk | 32 | 16.0× | 1–2 | 3 |
-| 2024 Paris Olympics | 2.3 wk | 46 | 23.0× | 2–3 | 3 |
+| 2022 FIFA 世界盃 | 4.0 週 | 36 | 36.0× | 1–2 | 5 週 |
+| 2023 WBC（台灣賽事） | 0.6 週 | 32 | 16.0× | 1–2 | 3 週 |
+| 2024 巴黎奧運 | 2.3 週 | 46 | 23.0× | 2–3 | 3 週 |
 
-Normalized decay (peak = 1.000):
+正規化衰退（峰值 = 1.000）：
 
-| Weeks after peak | 0 | 1 | 2 | 3 | 4 | 5 |
+| 峰值後週數 | 0 | 1 | 2 | 3 | 4 | 5 |
 |---|---|---|---|---|---|---|
-| World Cup | 1.000 | 0.694 | 0.472 | 0.194 | 0.250 | 0.056 |
+| 世界盃 | 1.000 | 0.694 | 0.472 | 0.194 | 0.250 | 0.056 |
 | WBC | 1.000 | 0.344 | 0.125 | 0.062 | 0.062 | 0.062 |
-| Paris Olympics | 1.000 | 0.761 | 0.087 | 0.065 | 0.065 | 0.065 |
+| 巴黎奧運 | 1.000 | 0.761 | 0.087 | 0.065 | 0.065 | 0.065 |
 
-The method chart — same event, two resolutions, two different answers:
+方法圖——同一場賽事，兩種解析度，兩個不同的答案：
 
-![Weekly aggregation puts the World Cup peak in the opening week; daily data puts it on the final. The same series, two aggregations, two different stories](docs/images/chart-daily-vs-weekly.png)
+![週聚合把世界盃的峰值判在開幕週，日資料判在決賽日。同一份序列、兩種聚合、兩個故事](docs/images/chart-daily-vs-weekly.png)
 
-<sup>Interactive: [`charts/daily-vs-weekly.html`](charts/daily-vs-weekly.html).
-Both lines are normalized to their own peak, so only shape and peak position are
-comparable — not height.</sup>
+<sup>互動版：[`charts/daily-vs-weekly.html`](charts/daily-vs-weekly.html)。
+兩條線各自對自己的峰值正規化，所以只能比形狀與峰值位置，不能比高度。</sup>
 
-Colour encodes the entity, never the ranking. All three panels of the primary
-chart use one blue, because the three tournaments are the same brand at different
-times rather than three different things. The method chart uses two lightness
-steps of that same hue, because weekly and daily are two aggregations of one
-series — dark is daily, light is weekly, and the lightness difference is itself
-the point being made. A rejected overlay variant was deleted once it had served
-its purpose; the reasoning is kept in [`docs/decision-trail.md`](docs/decision-trail.md).
+顏色只編碼實體，不編碼排名。主圖三格用同一個藍，因為三場賽事是同一個品牌的不同時間，
+不是三個不同的東西。方法圖用同色相的兩個明度階，因為週與日是同一份序列的兩種聚合——
+深＝日、淺＝週，明度差本身就是要講的那件事。
 
-## Limitations
+## 限制
 
-Read these before the numbers. They are not caveats bolted on at the end — several
-of them shaped the design.
+1. **搜尋熱度不是訂閱數。** 一個人可能在賽事期間訂閱、從未退訂，只是不再搜尋。
+   「不再搜尋」與「退訂」是兩件事，這份資料分不開。這是本結果最可能被誤讀的地方。
+2. **偵測下限取決於基準值，不是單一數字。** 基準區的週值是 1–3 的整數，
+   所以最小可見的提升是：基準 3 → **+33%**、基準 2 → **+50%**、
+   基準 1（世界盃）→ **+100%**。小於該幅度就看不見。按事件分別標示，不寫成單一數字。
+3. **n = 3，且賽事類型與賽程長度完全混淆。** WBC 掉得最快——可能因為棒球熱度短，
+   也可能只是台灣賽事只有一週。這份資料分不開兩者，所以所有結論都是描述性的，不是因果的。
+4. **採集不可重現，變異幅度未量化。** 每一次 Google Trends 查詢都是重新抽樣＋重新正規化，
+   歷史值**不是**定型的。`data/raw/` 的快照是用來凍結一個不穩定的來源——
+   那正是它存在的理由，不是在宣稱來源穩定。可重現性測試被配額擋下（見下）。
+5. **峰值與賽事的對應是日期對齊，不是驗證過的歸因**，賽事日期本身也未查一手來源。
+   轉播權**已**查證（2026-08-06）：三場 Hami Video 皆有轉播——世足賽專區與獨家 AR、
+   WBC 60 天方案與 Hami WBC1 台、巴黎奧運官方轉播表。所以這三場確實是這個平台打過的仗；
+   仍未驗證的是確切日期，以及某個峰值與某場比賽之間的因果連結。
+6. **只有世界盃窗取到日級資料。** WBC 與奧運窗從未取得。
 
-1. **Search interest is not subscriptions.** Someone may subscribe during a
-   tournament, never cancel, and simply stop searching. "Stopped searching" and
-   "churned" are different events and this data cannot separate them. This is the
-   single most likely misreading of the result.
-2. **The detection floor depends on the baseline value and is not one number.**
-   Weekly values in the baseline region are integers in the 1–3 range, so the
-   smallest visible lift is: baseline 3 → **+33%**, baseline 2 → **+50%**,
-   baseline 1 (World Cup) → **+100%**. Anything smaller is invisible. Reported
-   per event, never as a single figure.
-3. **n = 3, and sport type is fully confounded with tournament length.** WBC decays
-   fastest — that may be because baseball interest is short-lived, or simply
-   because Taiwan's games lasted one week. This data cannot separate the two, so
-   every conclusion here is descriptive, not causal.
-4. **Collection is not reproducible and the variance is unquantified.** Each Google
-   Trends query re-samples and re-normalizes; historical values are *not* frozen.
-   The snapshot under `data/raw/` freezes an unstable source — that is the reason
-   it exists, not a claim that the data is stable. The reproducibility test was
-   blocked by quota (see below).
-5. **Peaks are matched to tournaments by date alignment, not attribution**, and the
-   tournament dates themselves were not verified against primary sources.
-   Broadcast rights *were* checked (2026-08-06): Hami Video carried all three —
-   a World Cup section with exclusive AR, a 60-day WBC package plus the Hami WBC1
-   channel, and the official Paris Olympics schedule. So the events are ones this
-   platform actually competed in; what remains unverified is the exact dates and
-   the causal link between a given peak and a given match.
-6. **Only the World Cup window has daily data.** The WBC and Olympic windows were
-   never retrieved.
+**為什麼有幾項檢查缺席。** Google Trends 的速率限制是觸發式封鎖，不是每分鐘節流：
+前 14 分鐘成功率 41%，接著 0/30 橫跨 47.5 小時，退避與閒置冷卻皆無效。
+四項預定的驗證（可重現性、`中華電信 MOD` 對照組、事件關鍵字、兩個缺少的日級窗）尚未執行。
+每一項都問過「不補就不能交付嗎」——答案都是不會阻斷。
+完整的嘗試紀錄在 [`logs/quota_attempts.csv`](logs/quota_attempts.csv)。
 
-**Why several checks are missing.** Google Trends rate-limiting is a triggered
-block, not per-minute throttling: 41% success in the first 14 minutes, then 0/30
-across 47.5 hours, with backoff and idle cooldown both ineffective. Four planned
-verifications (reproducibility, a `中華電信 MOD` control, event keywords, and the
-two missing daily windows) remain unrun. Each was checked against "does this block
-delivery?" — none do. The full attempt log is in
-[`logs/quota_attempts.csv`](logs/quota_attempts.csv).
-
-## Repository layout
+## 目錄
 
 ```
-data/raw/     Google Trends snapshots (CSV) + collection timestamp
-logs/         append-only log of every API attempt, successful or not
-scripts/      analysis, chart generation, verification, and (quota-consuming) fetch
-tests/        pytest suite over scripts/metrics.py, including a real-data regression lock
-charts/       the two charts; plotly.min.js is vendored so they open offline
-docs/images/  rendered screenshots embedded above
-docs/         project rules, decision trail, and the outstanding verification spec
+data/raw/     Google Trends 快照（不隨版控散布）＋ 採集時間戳
+logs/         每一次 API 嘗試的 append-only 紀錄，成功與失敗都記
+scripts/      分析、圖表產生、驗證，以及（會消耗配額的）取數
+tests/        針對 scripts/metrics.py 的 pytest，含一項真實資料回歸鎖
+charts/       兩張圖表與摘要頁；plotly.min.js 隨附以便離線開啟
+docs/         專案守則、決策軌跡、待補驗證規格
+docs/images/  上方內嵌的渲染截圖
 ```
-
-`docs/` is written in Traditional Chinese — it is the working record for the author,
-not part of the public deliverable.

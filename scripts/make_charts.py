@@ -31,27 +31,25 @@ OUT.mkdir(parents=True, exist_ok=True)
 #   A：三格全部同一個藍——三場賽事是同一個品牌的三段時間，不是三個實體。
 #   C：同色相的兩個明度階（序數）——週與日是同一份資料的兩種聚合，不是兩件事。
 #      深＝日資料（揭露），淺＝週資料（抹平者），明度差本身就在講「粗細」。
-# 驗證：`node validate_palette.js "#86b6ef,#1c5cab" --mode light --ordinal` → 全 PASS
-#      （單色 #2a78d6 categorical 亦全 PASS，含對比 ≥3:1）
 # ══════════════════════════════════════════════════════════════════════════
-#  視覺方向：**量測儀表**（2026-08-09 改版，與姊妹專案共用同一套語言）
-#  深色儀表面 ＋ 數據走等寬字。避開「黑底＋螢光」與「米白＋髮絲線」兩種預設。
-#  驗證：node validate_palette.js "#3987e5" --mode dark --surface "#0f1720" → PASS
-#        node validate_palette.js "#1c5cab,#9ec5f4" --mode dark --surface "#0f1720"
-#          --ordinal → PASS
+#  視覺方向：**量測儀表**（2026-08-09，與姊妹專案 broadband-dashboard 同一套）
+#  水藍機殼 ＋ 近白卡片 ＋ 數據走等寬字。**預設給桌機觀看。**
+#  底色不用米白：那會退回「一份白底報告」。也不用深色：繁體中文筆畫密度高，
+#  淺字在暗底會產生光暈，系統字體沒有為深色調整字重。
 # ══════════════════════════════════════════════════════════════════════════
-S1 = "#3987e5"                            # 主圖：唯一系列色（三格同一實體）
-# ⚠️ 深色底下明度語意**方向相反**：亮的才是突出的那一個。
-# 所以 日資料（揭露者）＝亮，週資料（抹平者）＝暗。明度差仍在講「聚合粗細」。
-C_FINE, C_COARSE = "#9ec5f4", "#1c5cab"
-C_COARSE_FILL = "rgba(28,92,171,0.30)"
+S1 = "#2a78d6"                            # 主圖：唯一系列色（三格同一實體）
+# 同色相兩個明度階：深＝日資料（揭露者）、淺＝週資料（抹平者）。
+# 明度差本身就在講「聚合粗細」。
+#   node validate_palette.js "#86b6ef,#1c5cab" --mode light --ordinal → PASS
+C_COARSE, C_FINE = "#86b6ef", "#1c5cab"
+C_COARSE_FILL = "rgba(134,182,239,0.28)"
 
-PLANE = "#0a0f16"
-SURFACE = "#0f1720"
-HAIR = "rgba(255,255,255,0.09)"
-INK, INK2, MUTED = "#e6edf5", "#9fb0c4", "#67788d"
-GRID, AXIS = "rgba(255,255,255,0.065)", "rgba(255,255,255,0.20)"
-SHADE = "rgba(255,255,255,0.055)"       # 賽程陰影：中性，不佔用類別色
+PLANE = "#dce9f3"        # 頁面底：水藍機殼
+SURFACE = "#f2f8fc"      # 卡片面：近白冷調
+HAIR = "rgba(20,54,84,0.14)"
+INK, INK2, MUTED = "#0d1f2d", "#3d5568", "#6b8299"
+GRID, AXIS = "rgba(20,54,84,0.10)", "rgba(20,54,84,0.26)"
+SHADE = "rgba(20,54,84,0.07)"           # 賽程陰影：中性，不佔用類別色
 FONT = ('system-ui, -apple-system, "Segoe UI", "Noto Sans TC", '
         '"Microsoft JhengHei", sans-serif')
 MONO = ('ui-monospace, "Cascadia Mono", "SF Mono", Consolas, '
@@ -122,21 +120,11 @@ def shell(title, sub, figdiv, table_html, extra="", more=""):
  .sub{{font-size:14px;color:{INK2};margin:0 0 24px;line-height:1.8;max-width:76ch;}}
  .sub b{{color:{INK};font-weight:650;}}
  .card{{background:{SURFACE};border:1px solid {HAIR};border-radius:14px;
-       padding:14px 10px 8px;
-       /* 圖表在自己的容器裡橫向捲動，頁面本體永不橫向捲動。
-          三格 small multiples 壓進 375px 手機寬時，子標題會擠成一團——
-          給最小寬度讓使用者左右滑，比壓扁誠實。（2026-08-09 實機寬度驗證後加入） */
-       overflow-x:auto;-webkit-overflow-scrolling:touch;}}
- .card > div{{min-width:760px;}}
- .scrollhint{{display:none;font-size:12px;color:{MUTED};margin:8px 2px 0;
-            font-family:{MONO};}}
- @media (max-width:640px){{
-   .wrap{{padding:30px 15px 56px;}}
-   .sub{{font-size:13px;}}
-   .scrollhint{{display:block;}}
-   .foot{{font-size:12px;}}
-   code{{word-break:break-all;}}
- }}
+       padding:14px 10px 8px;box-shadow:0 1px 2px rgba(20,54,84,.05);
+       /* 三格 small multiples 有最小寬度，圖表在自己的容器裡捲動——
+          瀏覽器視窗拉窄時版面才不會破。 */
+       overflow-x:auto;}}
+ .card > div{{min-width:860px;}}
  details{{margin-top:24px;border-top:1px solid {HAIR};padding-top:6px;}}
  summary{{cursor:pointer;font-size:13px;color:{INK2};padding:8px 0;
          font-family:{MONO};letter-spacing:.02em;}}
@@ -148,7 +136,7 @@ def shell(title, sub, figdiv, table_html, extra="", more=""):
  th:first-child,td:first-child{{text-align:left;}}
  th{{color:{MUTED};font-weight:600;font-family:{MONO};font-size:11px;
     letter-spacing:.06em;text-transform:uppercase;}}
- code{{font-family:{MONO};font-size:12px;background:rgba(255,255,255,.06);
+ code{{font-family:{MONO};font-size:12px;background:rgba(20,54,84,.07);
      padding:2px 6px;border-radius:5px;color:{INK2};}}
  .foot{{font-size:12.5px;color:{MUTED};margin-top:24px;line-height:1.85;
       max-width:88ch;}}
@@ -160,7 +148,6 @@ def shell(title, sub, figdiv, table_html, extra="", more=""):
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <div class="wrap"><h1>{title}</h1><p class="sub">{sub}</p>
 <div class="card">{figdiv}</div>
-<p class="scrollhint">← 圖表可左右滑動</p>
 <details><summary>表格檢視（每個數值都可讀，不倚賴 tooltip）</summary>{table_html}</details>
 <p class="foot">{extra}</p>{more_html}</div>"""
 
@@ -185,8 +172,7 @@ for c, e in enumerate(EVENTS, start=1):
     figA.add_vrect(x0=e["x0"], x1=e["x1"], row=1, col=c,
                    fillcolor=SHADE, line_width=0, layer="below")
     figA.add_hrect(y0=e["blo_n"], y1=e["bhi_n"], row=1, col=c,
-                   # 基準帶：深色底上要用亮色薄膜，不是暗色（原本假設淺底）
-                   fillcolor="rgba(255,255,255,0.10)", line_width=0, layer="below")
+                   fillcolor="rgba(20,54,84,0.10)", line_width=0, layer="below")
     figA.add_hline(y=e["bhi_n"], row=1, col=c, line=dict(color=AXIS, width=1.5))
     xr = f"x{c if c > 1 else ''}"; yr = f"y{c if c > 1 else ''}"
     figA.add_annotation(x=0, y=1.0, xref=xr, yref=yr, text=f"<b>峰值 {e['peak_val']}</b>",

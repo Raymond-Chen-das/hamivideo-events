@@ -269,7 +269,7 @@ print("\n" + "=" * 70)
 PLOTLY_CHARTS = {"decay-by-event.html", "daily-vs-weekly.html"}
 # onepager 是靜態摘要頁（內嵌 PNG，無互動圖），**刻意不引用 Plotly**。
 # 把它併進上面那組會得到一條假的失敗——重新命名那輪把 glob 放寬成 *.html 時就踩到了。
-STATIC_ARTIFACTS = {"onepager.html", "onepager.pdf"}
+STATIC_ARTIFACTS = {"onepager.html"}   # PDF 管線已於 2026-08-09 移除
 EXPECTED = PLOTLY_CHARTS | STATIC_ARTIFACTS | {"plotly.min.js"}
 actual = {p.name for p in D.iterdir() if p.is_file()}
 print(f"charts/ 內容：{sorted(actual)}")
