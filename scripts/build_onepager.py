@@ -33,6 +33,26 @@ RAW = REPO / "data" / "raw"
 OUT = REPO / "charts"
 KW = "Hami Video"
 
+# QR 目標＝Pages 的主圖頁，**不是 repo 首頁**。掃碼的人要的是圖，不是程式碼。
+PAGES_URL = "https://raymond-chen-das.github.io/hamivideo-events/"
+
+
+def qr_svg_data_uri(url: str) -> str:
+    """回傳可直接放進 <img src> 的 SVG data URI。
+
+    用 SVG 而非 PNG：這份摘要會被列印成 PDF，向量碼在紙上與螢幕上都不會糊，
+    而糊掉的 QR 就是掃不到的 QR。error='m' 容錯約 15%，容得下列印與翻拍的損耗。
+    """
+    import base64
+    import io
+
+    import segno
+    buf = io.BytesIO()
+    segno.make(url, error="m").save(buf, kind="svg", scale=1, border=2,
+                                    dark="#0b0b0b", light="#ffffff", xmldecl=False)
+    return ("data:image/svg+xml;base64,"
+            + base64.b64encode(buf.getvalue()).decode("ascii"))
+
 # 賽事參考日：未查一手來源，僅作對齊用（規格第四節限制 5）。
 # 轉播權已於 2026-08-06 查證，三場 Hami Video 皆有轉播。
 EVENTS = [
@@ -152,6 +172,13 @@ ul{{margin:5px 0 0;padding-left:17px;}} li{{margin:3px 0;}}
 code{{font-size:10.5px;background:#f0f0ee;padding:0 3px;border-radius:3px;}}
 .foot{{margin-top:15px;padding-top:9px;border-top:1px solid {GRID};
       font-size:10.3px;color:{MUTED};}}
+.qrbar{{display:flex;align-items:center;gap:14px;margin-top:14px;padding-top:11px;
+       border-top:1px solid {GRID};}}
+.qrbar img{{width:74px;height:74px;flex:none;}}
+.qrtext{{font-size:11px;color:{INK2};line-height:1.55;}}
+.qrtext b{{color:{INK};}}
+.qrtext .u{{font-family:ui-monospace,monospace;font-size:10px;color:{MUTED};
+           word-break:break-all;}}
 @media print{{ body{{background:#fff;}} .page{{padding:0;max-width:none;}} }}
 </style>
 <div class="page">
@@ -197,6 +224,15 @@ code{{font-size:10.5px;background:#f0f0ee;padding:0 3px;border-radius:3px;}}
 
 <h2>我不宣稱的事</h2>
 <div class="honest"><ul>{nc}</ul></div>
+
+<div class="qrbar">
+  <img src="{qr_svg_data_uri(PAGES_URL)}" alt="QR code，開啟線上互動圖表">
+  <div class="qrtext">
+    <b>掃描開啟線上互動圖表</b>——三格衰退主圖（可查每週指數）、
+    以及同一場賽事日 vs 週兩種解析度的對照圖。<br>
+    <span class="u">{PAGES_URL}</span>
+  </div>
+</div>
 
 <p class="foot">
 限制六條完整版見 <code>README.md</code>，第一條為「搜尋熱度不等於訂閱數」——

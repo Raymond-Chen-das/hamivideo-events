@@ -35,6 +35,13 @@ ul{margin:5px 0 0;padding-left:17px;} li{margin:3px 0;}
 code{font-size:10.5px;background:#f0f0ee;padding:0 3px;border-radius:3px;}
 .foot{margin-top:15px;padding-top:9px;border-top:1px solid #e1e0d9;
       font-size:10.3px;color:#898781;}
+.qrbar{display:flex;align-items:center;gap:14px;margin-top:14px;padding-top:11px;
+       border-top:1px solid #e1e0d9;}
+.qrbar img{width:74px;height:74px;flex:none;}
+.qrtext{font-size:11px;color:#52514e;line-height:1.55;}
+.qrtext b{color:#0b0b0b;}
+.qrtext .u{font-family:ui-monospace,monospace;font-size:10px;color:#898781;
+           word-break:break-all;}
 @media print{ body{background:#fff;} .page{padding:0;max-width:none;} }
 </style>
 <div class="page">
@@ -80,6 +87,15 @@ code{font-size:10.5px;background:#f0f0ee;padding:0 3px;border-radius:3px;}
 
 <h2>我不宣稱的事</h2>
 <div class="honest"><ul><li>沒有任何訂閱、退訂、註冊或轉換資料——本分析只看得到搜尋關注。</li><li>不宣稱因果，也不使用預設有識別策略的方法名。三場之間賽事類型與賽程長度完全混淆（n=3），結論只能是描述性的。</li><li>本專案不含模型，也不是每日運行的管線。價值在約束與工程紀律，不在演算法。</li><li>深色模式未做——兩種模式應各自由調色盤取步、而非自動反轉，尚未執行。</li><li>四項驗證未完成（可重現性、MOD 對照、事件詞、兩個日級窗），皆被配額擋下。逐項問過「不補就不能交付嗎」，答案都是不能阻斷。</li></ul></div>
+
+<div class="qrbar">
+  <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzNyIgaGVpZ2h0PSIzNyIgY2xhc3M9InNlZ25vIj48cGF0aCBmaWxsPSIjZmZmIiBkPSJNMCAwaDM3djM3aC0zN3oiLz48cGF0aCBjbGFzcz0icXJsaW5lIiBzdHJva2U9IiMwYjBiMGIiIGQ9Ik0yIDIuNWg3bTEgMGgxbTEgMGgxbTEgMGgxbTEgMGgxbTEgMGgxbTEgMGgzbTIgMGgxbTIgMGg3bS0zMyAxaDFtNSAwaDFtMSAwaDFtMSAwaDFtMSAwaDFtMSAwaDFtMiAwaDFtNCAwaDNtMSAwaDFtNSAwaDFtLTMzIDFoMW0xIDBoM20xIDBoMW0yIDBoMm0yIDBoMm0xIDBoMW0yIDBoMm0yIDBoMm0xIDBoMW0xIDBoM20xIDBoMW0tMzMgMWgxbTEgMGgzbTEgMGgxbTEgMGgybTIgMGgxbTUgMGgybTIgMGgzbTEgMGgxbTEgMGgzbTEgMGgxbS0zMyAxaDFtMSAwaDNtMSAwaDFtNCAwaDJtMyAwaDJtMiAwaDJtNCAwaDFtMSAwaDNtMSAwaDFtLTMzIDFoMW01IDBoMW02IDBoNG0xIDBoNG0yIDBoMW0xIDBoMW01IDBoMW0tMzMgMWg3bTEgMGgxbTEgMGgxbTEgMGgxbTEgMGgxbTEgMGgxbTEgMGgxbTEgMGgxbTEgMGgxbTEgMGgxbTEgMGg3bS0yNSAxaDJtMSAwaDFtMyAwaDNtMSAwaDFtNCAwaDFtLTI1IDFoMW0xIDBoMm0xIDBoM20zIDBoMm0xIDBoNW0yIDBoMW0xIDBoMW0yIDBoMW0yIDBoMW0xIDBoMm0tMzMgMWgxbTEgMGgxbTEgMGgxbTIgMGgxbTEgMGgxbTMgMGgxbTIgMGg0bTEgMGgxbTEgMGgxbTIgMGgybTEgMGgybTEgMGgxbS0zMSAxaDJtMSAwaDdtMSAwaDFtNCAwaDFtMSAwaDFtMSAwaDNtMiAwaDNtMSAwaDJtLTMyIDFoMm00IDBoMm0xIDBoMW02IDBoMW0yIDBoMW0zIDBoMW0yIDBoMW0xIDBoMW0tMzAgMWg0bTIgMGg0bTQgMGgzbTIgMGgxbTIgMGg0bTEgMGgzbTIgMGgxbS0zMyAxaDJtMiAwaDJtMSAwaDFtMSAwaDJtMiAwaDJtMiAwaDFtMSAwaDJtMSAwaDFtMSAwaDJtMSAwaDFtMiAwaDJtLTMyIDFoMm0xIDBoMm0xIDBoMW0zIDBoMW04IDBoMm0zIDBoMW0xIDBoNW0tMzEgMWgxbTEgMGgxbTEgMGgybTIgMGgybTEgMGgxbTIgMGgybTMgMGgxbTEgMGgxbTMgMGgybTEgMGgxbTEgMGgxbS0yOCAxaDFtMiAwaDFtMyAwaDNtMSAwaDFtMSAwaDFtMSAwaDFtMSAwaDJtMSAwaDFtMSAwaDJtMSAwaDNtLTMxIDFoMm0yIDBoMm0xIDBoMW0yIDBoMm0yIDBoMm0yIDBoMW0xIDBoMW0xIDBoM20xIDBoMW0xIDBoMm0xIDBoMm0tMzMgMWgxbTQgMGgzbTIgMGgybTMgMGgybTEgMGgxbTEgMGgxbTEgMGgxbTIgMGgxbTEgMGgybTEgMGgybS0zMiAxaDFtMiAwaDJtMiAwaDRtMiAwaDJtMiAwaDJtNCAwaDFtNCAwaDFtLTI4IDFoMm0xIDBoM20yIDBoM20xIDBoNG0yIDBoM20xIDBoMW01IDBoMm0xIDBoMW0tMzMgMWgxbTEgMGgxbTEgMGgybTEgMGgybTEgMGgxbTEgMGgybTEgMGgybTIgMGgybTIgMGgxbTIgMGgxbTIgMGgxbTIgMGgxbS0zMSAxaDNtMSAwaDJtNCAwaDRtNCAwaDFtMSAwaDJtMiAwaDJtMiAwaDNtLTMyIDFoM20xIDBoMW0xIDBoMW0xIDBoM20yIDBoMm0yIDBoM20zIDBoM20xIDBoMm0xIDBoMW0tMzIgMWgxbTIgMGgybTEgMGgxbTIgMGgxbTEgMGgybTEgMGgxbTIgMGgybTMgMGgxbTEgMGg1bTIgMGgxbS0yNCAxaDJtMSAwaDJtMiAwaDJtMiAwaDFtNCAwaDFtMyAwaDJtLTMwIDFoN20xIDBoMm0yIDBoMm0zIDBoM20zIDBoMm0xIDBoMW0xIDBoMW0yIDBoMW0tMzIgMWgxbTUgMGgxbTEgMGgxbTIgMGgxbTQgMGgzbTIgMGg0bTMgMGgzbTEgMGgxbS0zMyAxaDFtMSAwaDNtMSAwaDFtMiAwaDFtMSAwaDJtMSAwaDFtMSAwaDRtMSAwaDhtMSAwaDFtMSAwaDFtLTMzIDFoMW0xIDBoM20xIDBoMW0xIDBoMW0xIDBoMW0xIDBoMW0xIDBoMW0xIDBoMm0yIDBoMW0xIDBoMm0zIDBoMW0yIDBoMW0xIDBoMW0tMzMgMWgxbTEgMGgzbTEgMGgxbTEgMGgxbTIgMGgybTIgMGgzbTYgMGgxbTEgMGgybTIgMGgxbS0zMSAxaDFtNSAwaDFtMiAwaDRtMSAwaDFtMiAwaDFtMSAwaDFtMiAwaDNtMiAwaDJtMyAwaDFtLTMzIDFoN20xIDBoMW0xIDBoNG0yIDBoM20yIDBoMW0xIDBoMW00IDBoMW0xIDBoMSIvPjwvc3ZnPgo=" alt="QR code，開啟線上互動圖表">
+  <div class="qrtext">
+    <b>掃描開啟線上互動圖表</b>——三格衰退主圖（可查每週指數）、
+    以及同一場賽事日 vs 週兩種解析度的對照圖。<br>
+    <span class="u">https://raymond-chen-das.github.io/hamivideo-events/</span>
+  </div>
+</div>
 
 <p class="foot">
 限制六條完整版見 <code>README.md</code>，第一條為「搜尋熱度不等於訂閱數」——

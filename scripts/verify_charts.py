@@ -292,6 +292,9 @@ op = D / "onepager.html"
 if op.exists():
     import re as _re
     for src in _re.findall(r'<img[^>]+src="([^"]+)"', op.read_text(encoding="utf-8")):
+        # data: URI 是內嵌的（QR code），沒有對應檔案，本來就不該去檔案系統找
+        if src.startswith("data:"):
+            continue
         if not (D / src).resolve().exists():
             fails.append(f"onepager.html 引用的圖不存在：{src}")
 

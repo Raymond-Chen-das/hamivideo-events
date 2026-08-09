@@ -96,7 +96,21 @@ def shell(title, sub, figdiv, table_html, extra="", more=""):
  .wrap{{max-width:1180px;margin:0 auto;padding:32px 20px 64px;}}
  h1{{font-size:21px;font-weight:650;margin:0 0 6px;letter-spacing:-.01em;}}
  .sub{{font-size:13.5px;color:{INK2};margin:0 0 22px;line-height:1.65;}}
- .card{{background:{SURFACE};border:1px solid rgba(11,11,11,.10);border-radius:10px;padding:8px 6px 4px;}}
+ .card{{background:{SURFACE};border:1px solid rgba(11,11,11,.10);border-radius:10px;padding:8px 6px 4px;
+       /* 圖表在自己的容器裡橫向捲動，頁面本體永不橫向捲動。
+          三格 small multiples 壓進 375px 手機寬時，子標題會擠成一團——
+          給最小寬度讓使用者左右滑，比壓扁誠實。（2026-08-09 實機寬度驗證後加入） */
+       overflow-x:auto;-webkit-overflow-scrolling:touch;}}
+ .card > div{{min-width:760px;}}
+ .scrollhint{{display:none;font-size:11.5px;color:{MUTED};margin:6px 2px 0;}}
+ @media (max-width:640px){{
+   .wrap{{padding:22px 14px 48px;}}
+   h1{{font-size:18px;}}
+   .sub{{font-size:12.5px;}}
+   .scrollhint{{display:block;}}
+   .foot{{font-size:11.5px;}}
+   code{{word-break:break-all;}}
+ }}
  details{{margin-top:22px;}} summary{{cursor:pointer;font-size:13px;color:{INK2};padding:6px 0;}}
  table{{border-collapse:collapse;font-size:12.5px;margin-top:10px;font-variant-numeric:tabular-nums;}}
  th,td{{border-bottom:1px solid {GRID};padding:5px 12px 5px 0;text-align:right;}}
@@ -104,8 +118,10 @@ def shell(title, sub, figdiv, table_html, extra="", more=""):
  .foot{{font-size:12px;color:{MUTED};margin-top:20px;line-height:1.7;}}
  .foot b{{color:{INK2};font-weight:600;}}
 </style>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <div class="wrap"><h1>{title}</h1><p class="sub">{sub}</p>
 <div class="card">{figdiv}</div>
+<p class="scrollhint">← 圖表可左右滑動</p>
 <details><summary>表格檢視（每個數值都可讀，不倚賴 tooltip）</summary>{table_html}</details>
 <p class="foot">{extra}</p>{more_html}</div>"""
 
@@ -273,7 +289,10 @@ rowsC = "".join(
 tableC = f"<table><tr><th>日期</th><th>日指數</th><th>該日所屬週的週指數</th></tr>{rowsC}</table>"
 
 # ── 輸出
-opts = dict(full_html=False, include_plotlyjs="directory", config={"displayModeBar": False})
+# responsive: True 是手機掃 QR 進來的必要條件——沒有它，Plotly 把寬度釘在
+# 產生當下的值，窄螢幕上就是一張切一半的圖。（先前只設了 displayModeBar。）
+opts = dict(full_html=False, include_plotlyjs="directory",
+            config={"displayModeBar": False, "responsive": True})
 (OUT / "decay-by-event.html").write_text(shell(
     "三場賽事的熱度回歸｜Hami Video 搜尋熱度",
     "每格一場賽事。<b>直式陰影＝實際賽程長度</b>（4.0／0.6／2.3 週，等比），"

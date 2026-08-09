@@ -9,7 +9,9 @@ survives the event.
 
 ![Three tournaments, one brand: each panel shows the decay back to the pre-event baseline band, with the shaded column marking actual tournament length](docs/images/chart-decay.png)
 
-<sup>Interactive version: [`charts/decay-by-event.html`](charts/decay-by-event.html) — opens offline.</sup>
+<sup>**▶ [Open the live chart](https://raymond-chen-das.github.io/hamivideo-events/)**
+— interactive, works on a phone. Same page as
+[`charts/decay-by-event.html`](charts/decay-by-event.html), which opens offline.</sup>
 
 **Two-page summary for screening:** [`charts/onepager.html`](charts/onepager.html)
 · [`charts/onepager.pdf`](charts/onepager.pdf). Every figure on it is recomputed
