@@ -9,6 +9,8 @@ import pandas as pd
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
+from _data import require
+
 print("=" * 74)
 print("(1) 假說：add_vrect/add_hline 的 exclude_empty_subplots 預設為 True，")
 print("    而我在『尚未加 trace』的空 subplot 上先加 shape → 被靜默丟棄")
@@ -42,7 +44,7 @@ print("\n" + "=" * 74)
 print("(2) 基準帶：找一個不被前一事件污染的定義")
 print("=" * 74)
 RAW = REPO / "data" / "raw"
-wk = pd.read_csv(RAW / "groupA_brand_5yr.csv", index_col=0, parse_dates=True)
+wk = pd.read_csv(require("groupA_brand_5yr.csv"), index_col=0, parse_dates=True)
 wk = wk[~wk["isPartial"].astype(bool)]["Hami Video"]
 EV = {"2022 世界盃": "2022-11-20", "2023 WBC": "2023-03-05", "2024 巴黎奧運": "2024-07-28"}
 for name, pk in EV.items():

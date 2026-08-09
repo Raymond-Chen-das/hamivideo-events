@@ -66,10 +66,42 @@ spikes: the World Cup final (2022-12-18) reads **61** daily but only **9** in th
 week containing it. Weekly therefore places the peak in the *opening* week, daily
 in the *final*. Both charts ship — the disagreement is part of the result.
 
+## Data availability
+
+**The raw snapshots are not distributed with this repository.** `data/raw/*.csv` were
+collected with `pytrends`, which talks to an unofficial Google Trends endpoint. Whether
+Google's terms permit redistributing the returned series is not something I have
+confirmed, so the files are excluded rather than assumed to be fine.
+
+Nothing you need in order to read this project depends on them. The charts, the
+summary and every number in this README are static artefacts, committed and complete:
+
+| Available without the raw data | |
+|---|---|
+| [`charts/decay-by-event.html`](charts/decay-by-event.html) | primary chart |
+| [`charts/daily-vs-weekly.html`](charts/daily-vs-weekly.html) | method chart |
+| [`charts/onepager.html`](charts/onepager.html) · [`.pdf`](charts/onepager.pdf) | summary |
+| this README | all result figures |
+
+To regenerate the snapshots, `scripts/fetch_day1.py` re-runs the collection. Read
+[`docs/prompt-verify-google-trends.md`](docs/prompt-verify-google-trends.md) first:
+**the rate limit is a triggered block, not per-minute throttling** — measured at 0/30
+successes across 47.5 hours once tripped, with backoff and idle cooldown both
+ineffective. Do not loop on retries.
+
+Every script that reads a snapshot goes through `scripts/_data.py`, which **fails with
+an explicit message naming the missing file and how to regenerate it** rather than a
+bare `FileNotFoundError`. The one test that needs real data skips, with its reason
+stated; the other 13 run normally.
+
+The collection timestamp (`data/raw/run1_timestamp.txt`) *is* tracked — it is
+provenance, not data.
+
 ## Reproduce
 
-Requires Python 3.13, `pandas`, `plotly`. No network access needed — all inputs are
-snapshots under `data/raw/`.
+Requires Python 3.13, `pandas`, `plotly`. No network access needed — the charts and
+summary rebuild from snapshots if you have them, and the committed artefacts stand on
+their own if you do not.
 
 ```bash
 pytest -q                                    # 14 tests over the metrics the results depend on

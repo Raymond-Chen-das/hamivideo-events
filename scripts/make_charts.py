@@ -18,6 +18,8 @@ from plotly.subplots import make_subplots
 
 from metrics import baseline_band
 
+from _data import require
+
 RAW = REPO / "data" / "raw"
 OUT = REPO / "charts"
 OUT.mkdir(parents=True, exist_ok=True)
@@ -41,9 +43,9 @@ FONT = 'system-ui, -apple-system, "Segoe UI", "Microsoft JhengHei", sans-serif'
 DISCLAIMER = "搜尋熱度 ≠ 訂閱數"
 
 # ── 資料
-wk = pd.read_csv(RAW / "groupA_brand_5yr.csv", index_col=0, parse_dates=True)
+wk = pd.read_csv(require("groupA_brand_5yr.csv"), index_col=0, parse_dates=True)
 wk = wk[~wk["isPartial"].astype(bool)]["Hami Video"]
-dy = pd.read_csv(RAW / "res_3mo_worldcup.csv", index_col=0, parse_dates=True)
+dy = pd.read_csv(require("res_3mo_worldcup.csv"), index_col=0, parse_dates=True)
 dy = dy[~dy["isPartial"].astype(bool)]["Hami Video"]
 
 EVENTS = [

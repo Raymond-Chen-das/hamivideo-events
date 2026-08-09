@@ -21,6 +21,8 @@ import pandas as pd
 
 from metrics import periods_to_threshold
 
+from _data import require
+
 RAW = REPO / "data" / "raw"
 KW = 'Hami Video'
 
@@ -30,7 +32,7 @@ EVENTS = {
     "2024 巴黎奧運": (dt.date(2024, 7, 26),  dt.date(2024, 8, 11)),
 }
 
-df = pd.read_csv(RAW / "groupA_brand_5yr.csv", index_col=0, parse_dates=True)
+df = pd.read_csv(require("groupA_brand_5yr.csv"), index_col=0, parse_dates=True)
 df = df[~df['isPartial'].astype(bool)]
 s = df[KW]
 print(f"資料：{RAW.name}/groupA_brand_5yr.csv  週解析度  {s.index[0].date()} ~ {s.index[-1].date()}  n={len(s)}")

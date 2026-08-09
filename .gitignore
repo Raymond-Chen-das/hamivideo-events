@@ -24,3 +24,10 @@ desktop.ini
 # The charts must open offline (same constraint as the sibling broadband project),
 # so the bundle is vendored rather than loaded from a CDN. It never changes,
 # so it does not inflate history.
+
+# ── 原始快照不隨版控散布 ────────────────────────────────────────────────
+# data/raw/*.csv 由 pytrends 從 Google Trends 的非官方端點取得。
+# 該服務條款對「再散布原始資料」的規範未經確認，因此不放進公開 repo。
+# 圖表與摘要是靜態產出，不受影響，照常隨 repo 提供。
+# 取得方式與配額限制見 README 的 "Data availability"。
+data/raw/*.csv

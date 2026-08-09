@@ -119,10 +119,22 @@ def test_baseline_band_raises_when_window_unavailable():
 
 
 # ── 與實際資料的一致性（回歸鎖） ─────────────────────────────────────────────
+RAW_SNAPSHOT = (Path(__file__).resolve().parents[1]
+                / "data" / "raw" / "groupA_brand_5yr.csv")
+
+
+@pytest.mark.skipif(
+    not RAW_SNAPSHOT.exists(),
+    reason="原始快照不隨版控散布（Google Trends 再散布規範未確認）；"
+           "取得方式見 README「Data availability」一節。"
+           "**其餘 13 項測試不依賴原始資料，仍會執行。**")
 def test_matches_published_results_on_real_data():
-    """鎖住 README 與交付物裡的三個數字。資料或定義一改，這裡就會紅。"""
-    raw = Path(__file__).resolve().parents[1] / "data" / "raw" / "groupA_brand_5yr.csv"
-    df = pd.read_csv(raw, index_col=0, parse_dates=True)
+    """鎖住 README 與交付物裡的三個數字。資料或定義一改，這裡就會紅。
+
+    這是唯一依賴原始快照的測試。乾淨 clone 上會 **skip 而非 fail**——
+    skip 說明得清清楚楚為什麼跳過，fail 只會讓人以為專案壞了。
+    """
+    df = pd.read_csv(RAW_SNAPSHOT, index_col=0, parse_dates=True)
     s = df[~df["isPartial"].astype(bool)]["Hami Video"]
 
     expected = {                       # 峰值日: (峰值, 基準帶, 回歸期數)

@@ -265,7 +265,12 @@ for name, exp_shapes in [("daily-vs-weekly.html", 0)]:
     check_ann_vs_data(l, d, "daily-vs-weekly")
 
 print("\n" + "=" * 70)
-EXPECTED = {"decay-by-event.html", "daily-vs-weekly.html", "plotly.min.js"}
+# 這兩張是 Plotly 產生的互動圖表——它們必須引用 plotly.min.js。
+PLOTLY_CHARTS = {"decay-by-event.html", "daily-vs-weekly.html"}
+# onepager 是靜態摘要頁（內嵌 PNG，無互動圖），**刻意不引用 Plotly**。
+# 把它併進上面那組會得到一條假的失敗——重新命名那輪把 glob 放寬成 *.html 時就踩到了。
+STATIC_ARTIFACTS = {"onepager.html", "onepager.pdf"}
+EXPECTED = PLOTLY_CHARTS | STATIC_ARTIFACTS | {"plotly.min.js"}
 actual = {p.name for p in D.iterdir() if p.is_file()}
 print(f"charts/ 內容：{sorted(actual)}")
 if actual - EXPECTED:
@@ -276,9 +281,19 @@ if EXPECTED - actual:
 
 js = D / "plotly.min.js"
 print(f"plotly.min.js 存在={js.exists()} 大小={js.stat().st_size if js.exists() else 0:,}")
-for f in D.glob("*.html"):
+for name in sorted(PLOTLY_CHARTS):
+    f = D / name
     if 'src="plotly.min.js"' not in f.read_text(encoding="utf-8"):
-        fails.append(f"{f.name} 未引用 plotly.min.js")
+        fails.append(f"{name} 未引用 plotly.min.js（離線開啟會變成空白圖）")
+
+# onepager 內嵌的是 PNG，不是 Plotly——但那張 PNG 必須真的存在，
+# 否則摘要印出來會是一個破圖框，而那正是要拿去投遞的東西。
+op = D / "onepager.html"
+if op.exists():
+    import re as _re
+    for src in _re.findall(r'<img[^>]+src="([^"]+)"', op.read_text(encoding="utf-8")):
+        if not (D / src).resolve().exists():
+            fails.append(f"onepager.html 引用的圖不存在：{src}")
 
 print("\n" + ("✘ 失敗：\n  " + "\n  ".join(fails) if fails else "✔ 全部通過"))
 sys.exit(1 if fails else 0)

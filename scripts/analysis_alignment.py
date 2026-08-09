@@ -6,8 +6,10 @@ from pathlib import Path
 warnings.filterwarnings("ignore")
 import pandas as pd
 
+from _data import require
+
 RAW = REPO / "data" / "raw"
-s = pd.read_csv(RAW / "groupA_brand_5yr.csv", index_col=0, parse_dates=True)
+s = pd.read_csv(require("groupA_brand_5yr.csv"), index_col=0, parse_dates=True)
 s = s[~s['isPartial'].astype(bool)]['Hami Video']
 
 # 賽事期間（參考日，未查一手來源）。WBC 另記台灣賽事期間。

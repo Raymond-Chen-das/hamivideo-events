@@ -27,6 +27,8 @@ import pandas as pd
 
 from metrics import baseline_band, periods_to_threshold
 
+from _data import require
+
 RAW = REPO / "data" / "raw"
 OUT = REPO / "charts"
 KW = "Hami Video"
@@ -84,7 +86,7 @@ NOT_CLAIMED = [
 
 
 def compute():
-    df = pd.read_csv(RAW / "groupA_brand_5yr.csv", index_col=0, parse_dates=True)
+    df = pd.read_csv(require("groupA_brand_5yr.csv"), index_col=0, parse_dates=True)
     df = df[~df["isPartial"].astype(bool)]
     s = df[KW]
     rows = []
