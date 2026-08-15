@@ -237,7 +237,7 @@ def shell(title, h1, eyebrow, standfirst, extra_top, figdiv, table_html,
     """圖表頁的外殼。
 
     門面只留讀者做判斷需要的東西；把方法細節塞進圖下方的六行小字，
-    對讀者是雜訊，對自己才是紀錄——所以收進可摺疊區，兩者都不犧牲。
+    對第一次讀的人是雜訊，對要複核的人才是紀錄——收進可摺疊區，兩者都不犧牲。
     """
     more_html = (f'<details><summary>方法細節（座標語意、基準帶定義）</summary>'
                  f'<p class="small">{more}</p></details>') if more else ""

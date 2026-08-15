@@ -7,7 +7,7 @@ venv/
 .ipynb_checkpoints/
 .pytest_cache/
 
-# Backups (governance rule: create before editing, delete after read-back verification)
+# 備份檔（驗證通過即刪；萬一遺留也不進版控）
 *.bak
 *.bak-*
 
@@ -20,23 +20,20 @@ desktop.ini
 .vscode/
 .idea/
 
-# Note: drafts/plotly.min.js IS tracked on purpose.
-# The charts must open offline (same constraint as the sibling broadband project),
-# so the bundle is vendored rather than loaded from a CDN. It never changes,
-# so it does not inflate history.
+# 注意：charts/plotly.min.js 是刻意納入版控的。
+# 圖表必須能離線開啟，所以把 bundle 隨 repo 帶著，而不是從 CDN 載。
+# 它不會變動，因此不會讓歷史膨脹。
 
-# ── 原始快照不隨版控散布 ────────────────────────────────────────────────
+# ── 原始快照不隨版控散布 ────────────────────────────────────────────
 # data/raw/*.csv 由 pytrends 從 Google Trends 的非官方端點取得。
 # 該服務條款對「再散布原始資料」的規範未經確認，因此不放進公開 repo。
 # 圖表與摘要是靜態產出，不受影響，照常隨 repo 提供。
-# 取得方式與配額限制見 README 的 "Data availability"。
+# 取得方式與配額限制見 README 的「原始資料的取得」。
 data/raw/*.csv
 
-# 內部文件（AI 協作指示與內部設計，僅本機，不公開）
+# 內部工作文件（僅本機，不公開）
 CLAUDE.md
 docs/10-project-spec.md
 docs/02-project-b-bootstrap.md
-
-# �������]�M���y��B�g������̪����ƥ��ȫ����F�ȥ����^
 docs/decision-trail.md
 docs/prompt-verify-google-trends.md

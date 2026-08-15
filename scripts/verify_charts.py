@@ -287,7 +287,7 @@ for name in sorted(PLOTLY_CHARTS):
         fails.append(f"{name} 未引用 plotly.min.js（離線開啟會變成空白圖）")
 
 # onepager 內嵌的是 PNG，不是 Plotly——但那張 PNG 必須真的存在，
-# 否則摘要印出來會是一個破圖框，而那正是要拿去投遞的東西。
+# 否則摘要印出來會是一個破圖框，而那是要交出去的成品。
 op = D / "onepager.html"
 if op.exists():
     import re as _re
