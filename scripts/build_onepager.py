@@ -110,10 +110,23 @@ NOT_CLAIMED = [
     ("不宣稱因果。",
      "亦不使用預設有識別策略的方法名。三場之間賽事類型與賽程長度完全混淆（n=3），"
      "結論只能是描述性的。"),
-    ("不含模型，也不是每日運行的管線。", "價值在約束與工程紀律，不在演算法。"),
+    # 原本只寫「不含模型」——這一頁設計成可單獨閱讀，那句會被讀成能力缺口。
+    # 補上建模作品的指路，把「本專案的取捨」與「這個人不會建模」分開。
+    # 三件作品均可在 ../portfolio.md 找到佐證。
+    ("本專案不含模型，也不是每日運行的管線。",
+     "建模作品另見 SECOM 半監督異常偵測、語音情緒辨識跨語料庫比較、台股情緒預測。"
+     "價值在約束與工程紀律，不在演算法。"),
     ("深色模式未做。", "兩種模式應各自訂定調色盤而非自動反轉，尚未執行。"),
     ("四項驗證未完成（可重現性、MOD 對照、事件詞、兩個日級窗）。",
      "均遭配額限制。逐項評估「未補齊是否構成交付阻斷」，結論皆為不構成阻斷。"),
+]
+
+# 「若取得內部資料，第一步會看什麼」。
+# 分寸線：**「建議公司做什麼」＝僭越；「若我在內部會先看什麼」＝問題排序能力。**
+# 維持假設語氣，不出現「建議」二字（本專案硬性約束第 4 條：不僭越）。
+IF_INSIDE = [
+    "若取得訂閱與退訂資料，把搜尋熱度曲線與實際訂閱曲線疊起來，"
+    "量化代理指標的效度。",
 ]
 
 
@@ -140,6 +153,7 @@ def build(s, rows) -> str:
         f"<tr><td class='cap'>{c}</td><td>{w}</td>"
         f"<td class='where'>{p}</td></tr>" for c, w, p in EVIDENCE)
     nc = "".join(f"<div class='nc'><b>{h}</b>{t}</div>" for h, t in NOT_CLAIMED)
+    ii = "".join(f"<div class='ii'>{t}</div>" for t in IF_INSIDE)
     tbl = "".join(
         f"<tr><td>{r['name']}</td><td>{r['dur']}</td><td>{r['peak']}</td>"
         f"<td>{r['burst']}×</td><td>{r['blo']:.0f}–{r['bhi']:.0f}</td>"
@@ -218,6 +232,17 @@ th:last-child,td:last-child{{padding-right:0;}}
        padding:16px 20px;display:flex;flex-direction:column;gap:9px;}}
 .nc{{font-size:12.8px;color:{INK2};}}
 .nc b{{color:{WARN};font-weight:500;}}
+
+/* 「我不宣稱的事」與「若取得內部資料會先看什麼」並排：
+   前者是能力邊界，後者是問題排序。兩者相鄰，讀者才不會把前者讀成後者的缺席。
+   用系列主色而非警示色——這一欄不是警告，是前瞻。 */
+.twocol{{display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:start;}}
+.twocol h2{{margin-top:32px;}}
+.inside{{background:{PAPER2};border:1px solid rgba(22,130,168,.22);border-radius:10px;
+       padding:16px 20px;display:flex;flex-direction:column;gap:9px;}}
+.ii{{font-size:12.8px;color:{INK2};padding-left:15px;position:relative;}}
+.ii::before{{content:"";position:absolute;left:0;top:7px;width:5px;height:5px;
+           border-radius:50%;background:{S1};}}
 code{{font-family:{MONO};font-size:11.5px;background:rgba(19,24,34,.06);
     padding:2px 6px;border-radius:4px;color:{INK2};}}
 
@@ -229,7 +254,8 @@ code{{font-family:{MONO};font-size:11.5px;background:rgba(19,24,34,.06);
      font-family:{MONO};font-size:10.5px;line-height:1.9;color:#98a0ad;}}
 a{{color:{S1};text-decoration:none;border-bottom:1px solid rgba(22,130,168,.28);}}
 a:hover{{color:{S1_D};border-bottom-color:{S1_D};}}
-@media (max-width:900px){{.page{{padding:32px 24px;}}}}
+@media (max-width:900px){{.page{{padding:32px 24px;}}
+  .twocol{{grid-template-columns:1fr;gap:0;}}}}
 </style>
 <div class="page">
 
@@ -284,8 +310,16 @@ a:hover{{color:{S1_D};border-bottom-color:{S1_D};}}
   {ev}
 </table>
 
-<h2>我不宣稱的事</h2>
-<div class="honest">{nc}</div>
+<div class="twocol">
+  <div>
+    <h2>我不宣稱的事</h2>
+    <div class="honest">{nc}</div>
+  </div>
+  <div>
+    <h2>若取得內部資料，第一步會看什麼</h2>
+    <div class="inside">{ii}</div>
+  </div>
+</div>
 
 <div class="qrbar">
   <b>掃描頁首 QR 開啟線上互動圖表</b>：三格衰退主圖（可查每週指數），

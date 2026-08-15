@@ -68,6 +68,17 @@ th:last-child,td:last-child{padding-right:0;}
        padding:16px 20px;display:flex;flex-direction:column;gap:9px;}
 .nc{font-size:12.8px;color:#4c5666;}
 .nc b{color:#a05a18;font-weight:500;}
+
+/* 「我不宣稱的事」與「若取得內部資料會先看什麼」並排：
+   前者是能力邊界，後者是問題排序。兩者相鄰，讀者才不會把前者讀成後者的缺席。
+   用系列主色而非警示色——這一欄不是警告，是前瞻。 */
+.twocol{display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:start;}
+.twocol h2{margin-top:32px;}
+.inside{background:#e5eff3;border:1px solid rgba(22,130,168,.22);border-radius:10px;
+       padding:16px 20px;display:flex;flex-direction:column;gap:9px;}
+.ii{font-size:12.8px;color:#4c5666;padding-left:15px;position:relative;}
+.ii::before{content:"";position:absolute;left:0;top:7px;width:5px;height:5px;
+           border-radius:50%;background:#1682a8;}
 code{font-family:'IBM Plex Mono', 'Noto Sans TC', ui-monospace, 'Cascadia Mono', 'SF Mono', Consolas, monospace;font-size:11.5px;background:rgba(19,24,34,.06);
     padding:2px 6px;border-radius:4px;color:#4c5666;}
 
@@ -79,7 +90,8 @@ code{font-family:'IBM Plex Mono', 'Noto Sans TC', ui-monospace, 'Cascadia Mono',
      font-family:'IBM Plex Mono', 'Noto Sans TC', ui-monospace, 'Cascadia Mono', 'SF Mono', Consolas, monospace;font-size:10.5px;line-height:1.9;color:#98a0ad;}
 a{color:#1682a8;text-decoration:none;border-bottom:1px solid rgba(22,130,168,.28);}
 a:hover{color:#0e647f;border-bottom-color:#0e647f;}
-@media (max-width:900px){.page{padding:32px 24px;}}
+@media (max-width:900px){.page{padding:32px 24px;}
+  .twocol{grid-template-columns:1fr;gap:0;}}
 </style>
 <div class="page">
 
@@ -134,8 +146,16 @@ a:hover{color:#0e647f;border-bottom-color:#0e647f;}
   <tr><td class='cap'>判準先於資料</td><td>閾值與事件選擇規則於檢視資料前存檔。<b>事後修正標示為事後，原數字保留不刪</b>：基準窗遭前一事件污染，故將 8 週 min–max 調整為 20 週 p25–p75</td><td class='where'>docs/decision-trail.md</td></tr><tr><td class='cap'>結論所依賴的量有測試</td><td>14 項 pytest 蓋住四個<b>會改變結論卻不會報錯</b>的函式；其中一項釘住基準帶的崩潰點，該定義並非無條件安全</td><td class='where'>scripts/metrics.py｜tests/</td></tr><tr><td class='cap'>驗證產出的成品，不是記憶體裡的物件</td><td>解析寫出的 HTML：shape 幾何、三種寬度的標註碰撞與溢出、<b>標註是否被資料線穿過</b></td><td class='where'>scripts/verify_charts.py</td></tr><tr><td class='cap'>不穩定來源的取用紀律</td><td>實測顯示配額機制為<b>觸發式封鎖</b>而非節流（0/30 橫跨 47.5 小時），因此改採 fail-fast；每次請求的成敗均寫入 append-only 紀錄</td><td class='where'>logs/quota_attempts.csv</td></tr><tr><td class='cap'>解析度作為方法論</td><td>同一場賽事，週級解析度將峰值判在開幕週，日級解析度則判在決賽日。<b>兩張都交付，因為分歧本身就是結果</b></td><td class='where'>charts/daily-vs-weekly.html</td></tr>
 </table>
 
-<h2>我不宣稱的事</h2>
-<div class="honest"><div class='nc'><b>沒有任何訂閱、退訂、註冊或轉換資料。</b>本分析僅能觀測搜尋關注度。</div><div class='nc'><b>不宣稱因果。</b>亦不使用預設有識別策略的方法名。三場之間賽事類型與賽程長度完全混淆（n=3），結論只能是描述性的。</div><div class='nc'><b>不含模型，也不是每日運行的管線。</b>價值在約束與工程紀律，不在演算法。</div><div class='nc'><b>深色模式未做。</b>兩種模式應各自訂定調色盤而非自動反轉，尚未執行。</div><div class='nc'><b>四項驗證未完成（可重現性、MOD 對照、事件詞、兩個日級窗）。</b>均遭配額限制。逐項評估「未補齊是否構成交付阻斷」，結論皆為不構成阻斷。</div></div>
+<div class="twocol">
+  <div>
+    <h2>我不宣稱的事</h2>
+    <div class="honest"><div class='nc'><b>沒有任何訂閱、退訂、註冊或轉換資料。</b>本分析僅能觀測搜尋關注度。</div><div class='nc'><b>不宣稱因果。</b>亦不使用預設有識別策略的方法名。三場之間賽事類型與賽程長度完全混淆（n=3），結論只能是描述性的。</div><div class='nc'><b>本專案不含模型，也不是每日運行的管線。</b>建模作品另見 SECOM 半監督異常偵測、語音情緒辨識跨語料庫比較、台股情緒預測。價值在約束與工程紀律，不在演算法。</div><div class='nc'><b>深色模式未做。</b>兩種模式應各自訂定調色盤而非自動反轉，尚未執行。</div><div class='nc'><b>四項驗證未完成（可重現性、MOD 對照、事件詞、兩個日級窗）。</b>均遭配額限制。逐項評估「未補齊是否構成交付阻斷」，結論皆為不構成阻斷。</div></div>
+  </div>
+  <div>
+    <h2>若取得內部資料，第一步會看什麼</h2>
+    <div class="inside"><div class='ii'>若取得訂閱與退訂資料，把搜尋熱度曲線與實際訂閱曲線疊起來，量化代理指標的效度。</div></div>
+  </div>
+</div>
 
 <div class="qrbar">
   <b>掃描頁首 QR 開啟線上互動圖表</b>：三格衰退主圖（可查每週指數），
