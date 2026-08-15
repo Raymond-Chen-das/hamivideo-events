@@ -1,12 +1,17 @@
-"""Day 2 — 中華電信 MOD 對照 ＋ B 組事件詞。依 prompt 第三、四、五節。
-硬上限 4 次嘗試（每查詢最多 2），重試間隔 >=300s，每次嘗試都記 log。
-注意：本次執行未滿「Day1/Day2 間隔 >=24h」的規格要求，log 的 notes 欄已標記。
+"""Day 2 — 中華電信 MOD 對照 ＋ B 組事件詞。
 
-⚠️ 本檔保留當時實際執行的版本，**不回頭改寫**。
-   其中的退避重試（RETRY_GAP）是執行當下的假設；後續實測推翻了它——
-   配額為觸發式封鎖而非每分鐘節流（0/30 橫跨 47.5 小時，退避與冷卻皆無效），
-   結論改採 fail-fast，見 ``scripts/_data.py`` 與 ``logs/quota_attempts.csv``。
-   若要重新取數，請照該結論辦理，不要沿用本檔的重試迴圈。
+**取數策略：fail-fast。第一個 429 就中止當天全部請求，不重試、不等待。**
+
+依據是實測而非偏好：配額為**觸發式封鎖**，不是每分鐘節流——踩線後 0/30 橫跨
+47.5 小時，300 秒退避與 25 分鐘閒置冷卻皆無效（紀錄見 ``logs/quota_attempts.csv``）。
+更關鍵的是**不知道 429 本身是否也消耗配額**：若消耗，重試等於加深封鎖。
+fail-fast 在「消耗」與「不消耗」兩種假設下都是對的，這才是它成立的理由，
+而不只是「重試沒用」。
+
+每一次嘗試（成功或失敗）都寫入 ``logs/quota_attempts.csv``（append-only）。
+
+> 本檔早期版本採 300 秒退避重試，那是執行當下的假設，已被上述實測推翻。
+> 舊行為保留在 git 歷史與 quota_attempts.csv 的實際嘗試紀錄裡，不在此重演。
 """
 from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]   # repo 根目錄，腳本可隨 repo 搬移
@@ -23,8 +28,12 @@ BASE = REPO
 RAW, LOGS = BASE / "data" / "raw", BASE / "logs"
 LOGFILE = LOGS / "quota_attempts.csv"
 HL, TZ, GEO = 'zh-TW', -480, 'TW'
-TF5, RETRY_GAP, DAY = '2021-08-03 2026-08-02', 300, "Day2"
+TF5, DAY = '2021-08-03 2026-08-02', "Day2"
 VIOLATION = "interval<24h_from_Day1"
+
+
+class QuotaBlocked(Exception):
+    """收到 429。fail-fast：當天不再發任何請求。"""
 COLS = ["timestamp_iso", "day_label", "query_label", "kw_list", "timeframe", "geo", "hl", "tz",
         "attempt_no", "result", "error_type", "elapsed_sec", "notes"]
 
@@ -36,38 +45,34 @@ def log(**kw):
             w.writeheader()
         w.writerow(kw)
 
-def fetch(query_label, kw_list, out_name, max_attempts=2):
+def fetch(query_label, kw_list, out_name):
+    """發一次請求。429 一律拋 QuotaBlocked，由呼叫端中止當天所有後續請求。"""
     print(f"\n{'='*72}\n[{query_label}] kw={kw_list} tf='{TF5}'", flush=True)
-    for n in range(1, max_attempts + 1):
-        t0, ts = time.time(), dt.datetime.now().isoformat(timespec='seconds')
-        base = dict(timestamp_iso=ts, day_label=DAY, query_label=query_label,
-                    kw_list="|".join(kw_list), timeframe=TF5, geo=GEO, hl=HL, tz=TZ, attempt_no=n)
-        try:
-            pt = TrendReq(hl=HL, tz=TZ)
-            pt.build_payload(kw_list=kw_list, geo=GEO, timeframe=TF5)
-            df = pt.interest_over_time()
-            el = round(time.time() - t0, 2)
-            log(**base, result="ok", error_type="", elapsed_sec=el,
-                notes=f"shape={df.shape};{VIOLATION}")
-            df.to_csv(RAW / out_name, encoding='utf-8-sig')
-            print(f"  OK 第 {n} 次 ({ts}, {el}s) shape={df.shape} -> raw/{out_name}", flush=True)
-            return df
-        except TooManyRequestsError:
-            el = round(time.time() - t0, 2)
-            log(**base, result="429", error_type="pytrends.exceptions.TooManyRequestsError",
-                elapsed_sec=el, notes=VIOLATION)
-            print(f"  429 第 {n} 次 ({ts}, {el}s)", flush=True)
-            if n < max_attempts:
-                print(f"  -> 等 {RETRY_GAP}s 後重試同一查詢", flush=True)
-                time.sleep(RETRY_GAP)
-        except Exception as e:
-            el = round(time.time() - t0, 2)
-            log(**base, result="other", error_type=f"{type(e).__module__}.{type(e).__name__}",
-                elapsed_sec=el, notes=f"{VIOLATION};{str(e)[:150]}")
-            print(f"  非429錯誤 第 {n} 次: {type(e).__name__}: {e}", flush=True)
-            return None
-    print(f"  放棄（用完 {max_attempts} 次嘗試）", flush=True)
-    return None
+    t0, ts = time.time(), dt.datetime.now().isoformat(timespec='seconds')
+    base = dict(timestamp_iso=ts, day_label=DAY, query_label=query_label,
+                kw_list="|".join(kw_list), timeframe=TF5, geo=GEO, hl=HL, tz=TZ, attempt_no=1)
+    try:
+        pt = TrendReq(hl=HL, tz=TZ)
+        pt.build_payload(kw_list=kw_list, geo=GEO, timeframe=TF5)
+        df = pt.interest_over_time()
+        el = round(time.time() - t0, 2)
+        log(**base, result="ok", error_type="", elapsed_sec=el,
+            notes=f"shape={df.shape};{VIOLATION}")
+        df.to_csv(RAW / out_name, encoding='utf-8-sig')
+        print(f"  OK ({ts}, {el}s) shape={df.shape} -> raw/{out_name}", flush=True)
+        return df
+    except TooManyRequestsError:
+        el = round(time.time() - t0, 2)
+        log(**base, result="429", error_type="pytrends.exceptions.TooManyRequestsError",
+            elapsed_sec=el, notes=f"{VIOLATION};fail-fast_abort")
+        print(f"  429 ({ts}, {el}s) -> fail-fast：中止當天所有請求，不重試", flush=True)
+        raise QuotaBlocked(query_label)
+    except Exception as e:
+        el = round(time.time() - t0, 2)
+        log(**base, result="other", error_type=f"{type(e).__module__}.{type(e).__name__}",
+            elapsed_sec=el, notes=f"{VIOLATION};{str(e)[:150]}")
+        print(f"  非429錯誤: {type(e).__name__}: {e}", flush=True)
+        return None
 
 def clean(df):
     return df[~df['isPartial'].astype(bool)] if 'isPartial' in df.columns else df
@@ -76,9 +81,17 @@ def clean(df):
 
 print("Day 2 START", dt.datetime.now().isoformat(timespec='seconds'), flush=True)
 
-mod = fetch("MOD_control", ['MOD', '中華電信 MOD', 'Hami Video'], "mod_control.csv")
-time.sleep(60)
-evt = fetch("groupB_event", ['世界盃', 'WBC', '經典賽'], "groupB_event_5yr.csv")
+# fail-fast：第一個 429 就中止，不重試也不等待。
+# 兩個查詢之間原本有 60 秒間隔，一併移除——它建立在「節流」的假設上，
+# 而實測顯示配額是觸發式封鎖，等待不會恢復額度。
+mod = evt = None
+try:
+    mod = fetch("MOD_control", ['MOD', '中華電信 MOD', 'Hami Video'], "mod_control.csv")
+    evt = fetch("groupB_event", ['世界盃', 'WBC', '經典賽'], "groupB_event_5yr.csv")
+except QuotaBlocked as blocked:
+    print(f"\n{'!'*72}\n配額封鎖於 [{blocked}]，當天中止。", flush=True)
+    print("未取得的項目一律記為【未驗證】，不以其他查詢湊數。", flush=True)
+    print(f"嘗試紀錄：{LOGFILE}\n{'!'*72}", flush=True)
 
 # ---- 判準 4.2 ----
 print(f"\n{'#'*72}\n### 判準 4.2  中華電信 MOD 對照", flush=True)
