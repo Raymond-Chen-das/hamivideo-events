@@ -31,3 +31,8 @@ desktop.ini
 # 圖表與摘要是靜態產出，不受影響，照常隨 repo 提供。
 # 取得方式與配額限制見 README 的 "Data availability"。
 data/raw/*.csv
+
+# 內部文件（AI 協作指示與內部設計，僅本機，不公開）
+CLAUDE.md
+docs/10-project-spec.md
+docs/02-project-b-bootstrap.md
