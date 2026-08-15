@@ -20,7 +20,7 @@ _HOWTO = """
 原始快照不隨版控散布（Google Trends 服務條款對再散布的規範未經確認）。
 
 重新取得：
-    python scripts/fetch_day1.py       # 會消耗配額，先讀 docs/prompt-verify-google-trends.md
+    python scripts/fetch_day1.py       # 會消耗配額，先讀下方的配額說明
 
 ⚠️ 配額是**觸發式封鎖**而非每分鐘節流——實測踩線後 0/30 橫跨 47.5 小時，
    退避與冷卻皆無效。不要迴圈重試。

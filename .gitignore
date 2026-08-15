@@ -36,3 +36,7 @@ data/raw/*.csv
 CLAUDE.md
 docs/10-project-spec.md
 docs/02-project-b-bootstrap.md
+
+# 內部文件（決策軌跡、寫給執行者的取數任務契約；僅本機）
+docs/decision-trail.md
+docs/prompt-verify-google-trends.md

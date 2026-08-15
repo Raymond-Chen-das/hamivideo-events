@@ -3,9 +3,9 @@
 A：三格 small multiples（主視覺）
 C：世足 日 vs 週（方法論，第二張）
 
-草稿 B（疊合正規化曲線）已於 2026-08-05 刪除：用途是讓人比較設計方向，目的已達成，
-否決理由留在 docs/decision-trail.md。留著只會持續消耗版面維護成本。
-編號保留 A/C 不重排，避免與既有文件、commit 訊息對不上。
+草稿 B（疊合正規化曲線）已於 2026-08-05 刪除：它強調的「發散」只是賽程長度的翻譯，
+且第 3 週後三條曲線全部壓在 5.6–6.5%，七成畫布零資訊。
+編號保留 A/C 不重排，避免與既有 commit 訊息對不上。
 """
 from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]   # repo 根目錄，腳本可隨 repo 搬移
@@ -280,8 +280,8 @@ def shell(title, h1, eyebrow, standfirst, extra_top, figdiv, table_html,
 </main>
 
 <footer class="foot"><div class="wrap">
-圖表由 <code>scripts/make_charts.py</code> 產生，判準與推翻歷程見
-<code>docs/decision-trail.md</code>（append-only）。<br>
+圖表由 <code>scripts/make_charts.py</code> 產生；
+判準於檢視資料前存檔，事後修正一律標示為事後。<br>
 外部求職者以公開資料製作，非中華電信內部文件，不代表該公司立場。
 </div></footer>
 

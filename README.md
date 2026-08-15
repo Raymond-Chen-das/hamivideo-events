@@ -41,10 +41,11 @@
 | [`charts/onepager.html`](charts/onepager.html) | 摘要 |
 | 本 README | 全部結果數字 |
 
-要重新取得快照，`scripts/fetch_day1.py` 會重跑採集。**動手前先讀**
-[`docs/prompt-verify-google-trends.md`](docs/prompt-verify-google-trends.md)：
+要重新取得快照，`scripts/fetch_day1.py` 會重跑採集。動手前先知道這件事：
 **配額是觸發式封鎖，不是每分鐘節流**——實測踩線後 0/30 橫跨 47.5 小時，
-退避與閒置冷卻皆無效。**不要迴圈重試。**
+退避與閒置冷卻皆無效。**不要迴圈重試。** 取數腳本一律 fail-fast：
+第一個 429 就中止當天所有請求，每次嘗試都寫進
+[`logs/quota_attempts.csv`](logs/quota_attempts.csv)。
 
 每一支讀取快照的腳本都經過 `scripts/_data.py`，缺檔時會**明確指出缺哪個檔、怎麼重生**，
 而不是丟一個裸的 `FileNotFoundError`。唯一需要真實資料的測試會 skip 並說明理由，
@@ -69,8 +70,8 @@
 
 用分位數而非 min–max：WBC 的基準窗仍與世界盃重疊（max = 36），
 min–max 會把基準帶撐成無意義的寬帶。原本 8 週的定義也被同樣的方式污染；
-修正版在 [`docs/decision-trail.md`](docs/decision-trail.md) 中**明確標示為事後修正**，
-預先登記的原始數字保留不刪。
+修正版**明確標示為事後修正**——**預先登記的原始數字保留不刪**：
+WBC 的回歸週數由 1 週改為 3 週，世界盃與奧運不變。
 
 **日級解析度的交叉檢查。** 其中一個事件窗另外以日解析度取得（2022-11-01 → 2023-01-31）。
 它顯示週聚合會抹掉單日爆發：世界盃決賽日（2022-12-18）日指數 **61**，
@@ -181,6 +182,6 @@ logs/         每一次 API 嘗試的 append-only 紀錄，成功與失敗都記
 scripts/      分析、圖表產生、驗證，以及（會消耗配額的）取數
 tests/        針對 scripts/metrics.py 的 pytest，含一項真實資料回歸鎖
 charts/       兩張圖表與摘要頁；plotly.min.js 隨附以便離線開啟
-docs/         專案守則、決策軌跡、待補驗證規格
+docs/         內嵌於 README 的渲染截圖（見 docs/images/）
 docs/images/  上方內嵌的渲染截圖
 ```

@@ -143,7 +143,7 @@ a:hover{color:#0e647f;border-bottom-color:#0e647f;}
 <h2>條件對照</h2>
 <table class="cond">
   <tr><th>能力項目</th><th>本專案的對應證據</th><th>位置</th></tr>
-  <tr><td class='cap'>判準先於資料</td><td>閾值與事件選擇規則於檢視資料前存檔。<b>事後修正標示為事後，原數字保留不刪</b>：基準窗遭前一事件污染，故將 8 週 min–max 調整為 20 週 p25–p75</td><td class='where'>docs/decision-trail.md</td></tr><tr><td class='cap'>結論所依賴的量有測試</td><td>14 項 pytest 蓋住四個<b>會改變結論卻不會報錯</b>的函式；其中一項釘住基準帶的崩潰點，該定義並非無條件安全</td><td class='where'>scripts/metrics.py｜tests/</td></tr><tr><td class='cap'>驗證產出的成品，不是記憶體裡的物件</td><td>解析寫出的 HTML：shape 幾何、三種寬度的標註碰撞與溢出、<b>標註是否被資料線穿過</b></td><td class='where'>scripts/verify_charts.py</td></tr><tr><td class='cap'>不穩定來源的取用紀律</td><td>實測顯示配額機制為<b>觸發式封鎖</b>而非節流（0/30 橫跨 47.5 小時），因此改採 fail-fast；每次請求的成敗均寫入 append-only 紀錄</td><td class='where'>logs/quota_attempts.csv</td></tr><tr><td class='cap'>解析度作為方法論</td><td>同一場賽事，週級解析度將峰值判在開幕週，日級解析度則判在決賽日。<b>兩張都交付，因為分歧本身就是結果</b></td><td class='where'>charts/daily-vs-weekly.html</td></tr>
+  <tr><td class='cap'>判準先於資料</td><td>閾值與事件選擇規則於檢視資料前存檔。<b>事後修正標示為事後，原數字保留不刪</b>：基準窗遭前一事件污染，故將 8 週 min–max 調整為 20 週 p25–p75</td><td class='where'>README.md</td></tr><tr><td class='cap'>結論所依賴的量有測試</td><td>14 項 pytest 蓋住四個<b>會改變結論卻不會報錯</b>的函式；其中一項釘住基準帶的崩潰點，該定義並非無條件安全</td><td class='where'>scripts/metrics.py｜tests/</td></tr><tr><td class='cap'>驗證產出的成品，不是記憶體裡的物件</td><td>解析寫出的 HTML：shape 幾何、三種寬度的標註碰撞與溢出、<b>標註是否被資料線穿過</b></td><td class='where'>scripts/verify_charts.py</td></tr><tr><td class='cap'>不穩定來源的取用紀律</td><td>實測顯示配額機制為<b>觸發式封鎖</b>而非節流（0/30 橫跨 47.5 小時），因此改採 fail-fast；每次請求的成敗均寫入 append-only 紀錄</td><td class='where'>logs/quota_attempts.csv</td></tr><tr><td class='cap'>解析度作為方法論</td><td>同一場賽事，週級解析度將峰值判在開幕週，日級解析度則判在決賽日。<b>兩張都交付，因為分歧本身就是結果</b></td><td class='where'>charts/daily-vs-weekly.html</td></tr>
 </table>
 
 <div class="twocol">
@@ -166,7 +166,7 @@ a:hover{color:#0e647f;border-bottom-color:#0e647f;}
 <p class="foot">
 限制六條完整版見 README.md，第一條為「搜尋熱度不等於訂閱數」：
 賽事期間訂閱、賽後不再搜尋但未退訂者，本資料無法區分。
-判準與推翻歷程見 docs/decision-trail.md（append-only）。<br>
+判準於檢視資料前存檔，事後修正一律標示為事後。<br>
 本頁所有數值由 scripts/build_onepager.py 於產生時自快照重新計算，非手動填寫。
 </p>
 
